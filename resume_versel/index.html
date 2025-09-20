@@ -228,8 +228,8 @@
         let isJdProcessed = false;
         let jobDescriptionData = null;
         let selectedResumes = [];
-        // THE ONLY CHANGE IS ON THE NEXT LINE
-        const API_URL = '/analyze_resumes';
+        // Use a specific API endpoint for Vercel
+        const API_URL = '/api/analyze';
 
 
         // --- Event Listeners ---
@@ -380,7 +380,7 @@
                 // Restore the 'start over' button if analysis fails
                 startOverBtn.click(); 
                 console.error('Error during analysis:', error);
-                showMessage('Analysis Failed', `Could not connect to the backend. Please ensure it's running at ${API_URL}. Error: ${error.message}`);
+                showMessage('Analysis Failed', `Could not connect to the backend. Error: ${error.message}`);
             }
         }
 
@@ -437,7 +437,3 @@
                 resultsTableBody.appendChild(row);
             });
         }
-    </script>
-
-</body>
-</html>
