@@ -31,11 +31,12 @@ def get_llm_analysis(resume_text: str, jd_text: str) -> dict:
         return {"score": 0, "suggestions": "LLM not available. Check API key."}
     try:
         prompt = PromptTemplate.from_template(
-            """Analyze the resume against the job description. Respond ONLY with a single JSON object with two keys: "score" and "suggestions".
+            """Analyze the resume against the job description. Respond ONLY with a single, valid JSON object with two keys: "score" and "suggestions".
 - "score": An integer (0-100) for match quality.
-- "suggestions": A brief string of bulleted resume improvement advice.
+- "suggestions": A brief string of actionable resume improvement advice, formatted with bullet points (e.g., "- suggestion one\\n- suggestion two").
 
-Example: {{"score": 75, "suggestions": "- Highlight cloud experience.\\n- Quantify achievements."}}
+Example of a valid response:
+{{"score": 75, "suggestions": "- Highlight cloud experience like AWS.\\n- Quantify achievements in past projects with metrics."}}
 
 JD: {jd}
 Resume: {resume}
@@ -45,8 +46,10 @@ JSON Response:
         chain = LLMChain(llm=llm, prompt=prompt)
         response_text = chain.invoke({"resume": resume_text, "jd": jd_text}).get("text", "{}")
         
+        # More robust JSON parsing
         json_match = re.search(r'\{.*\}', response_text, re.DOTALL)
         if not json_match:
+            print(f"[api] AI response did not contain JSON: {response_text}")
             return {"score": 0, "suggestions": "AI response format error."}
 
         clean_json_str = json_match.group(0)
@@ -55,12 +58,13 @@ JSON Response:
         score_val = parsed_json.get("score", 0)
         suggestions_val = parsed_json.get("suggestions", "No suggestions generated.")
         
+        # Normalize score to be out of 50 for the semantic portion of the total score
         normalized_score = (int(score_val) / 100) * 50
         
         return {"score": max(0, min(normalized_score, 50)), "suggestions": suggestions_val}
     except Exception as e:
         print(f"[api] Critical error in get_llm_analysis: {e}")
-        return {"score": 0, "suggestions": "Error during AI analysis. Check logs."}
+        return {"score": 0, "suggestions": "Error during AI analysis. Check Vercel logs."}
 
 # --- Text extraction and keyword matching logic ---
 STOP_WORDS = {'and', 'the', 'of', 'in', 'to', 'a', 'with', 'for', 'on', 'is', 'are'}
@@ -86,7 +90,9 @@ def get_hard_match_score(resume_text: str, jd_text: str):
     resume_words = set(re.findall(r'\b\w+\b', resume_text.lower()))
     jd_skills = {w for w in jd_words if w not in STOP_WORDS and w in KNOWN_SKILLS}
     if not jd_skills:
-        return 0.0, [], list(KNOWN_SKILLS.intersection(resume_words))
+        # If no relevant skills in JD, return 0 score but show what skills the resume DOES have
+        resume_known_skills = KNOWN_SKILLS.intersection(resume_words)
+        return 0.0, [], list(resume_known_skills)
     resume_skills = KNOWN_SKILLS.intersection(resume_words)
     matched = resume_skills.intersection(jd_skills)
     missing = jd_skills.difference(resume_skills)
@@ -139,7 +145,7 @@ class handler(BaseHTTPRequestHandler):
                 verdict = "High" if total_score >= 80 else "Medium" if total_score >= 50 else "Low"
                 
                 results.append({
-                    "resumeName": file_name, # CHANGED: Using file_name for the table
+                    "resumeName": file_name,
                     "candidateEmail": candidate_email,
                     "score": total_score,
                     "verdict": verdict,
@@ -157,4 +163,3 @@ class handler(BaseHTTPRequestHandler):
             self.send_header('Content-type', 'application/json')
             self.end_headers()
             self.wfile.write(json.dumps({"error": f"An internal server error occurred: {str(e)}"}).encode('utf-8'))
-
