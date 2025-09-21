@@ -102,18 +102,19 @@ def extract_text_from_docx(file_bytes: bytes) -> str:
         return ""
 
 def get_hard_match_score(resume_text: str, jd_text: str):
-    jd_words = set(re.findall(r'\b\w+\b', jd_text.lower()))
-    resume_words = set(re.findall(r'\b\w+\b', resume_text.lower()))
+    lower_jd_text = jd_text.lower()
+    lower_resume_text = resume_text.lower()
     
-    # Find which of our known skills are mentioned in the Job Description
-    jd_skills = {skill for skill in KNOWN_SKILLS if skill in jd_text.lower()}
+    # Find which of our known skills are mentioned in the Job Description using whole word matching
+    jd_skills = {skill for skill in KNOWN_SKILLS if re.search(r'\b' + re.escape(skill) + r'\b', lower_jd_text)}
     
     if not jd_skills:
         # If no relevant skills are in the JD, we can't calculate a hard score fairly.
         return 0.0, [], []
 
-    # Find which of the required JD skills are also in the resume
-    resume_skills_present = {skill for skill in KNOWN_SKILLS if skill in resume_text.lower()}
+    # Find which of the required JD skills are also in the resume using whole word matching
+    resume_skills_present = {skill for skill in KNOWN_SKILLS if re.search(r'\b' + re.escape(skill) + r'\b', lower_resume_text)}
+    
     matched = jd_skills.intersection(resume_skills_present)
     missing = jd_skills.difference(resume_skills_present)
     
@@ -194,3 +195,4 @@ class handler(BaseHTTPRequestHandler):
             self.send_header('Content-type', 'application/json')
             self.end_headers()
             self.wfile.write(json.dumps({"error": f"An internal server error occurred: {str(e)}"}).encode('utf-8'))
+
