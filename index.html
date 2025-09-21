@@ -11,33 +11,12 @@
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
-        }
-        .animate-spin-slow {
-            animation: spin 3s linear infinite;
-        }
-        @keyframes spin {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
-        .pulse-once {
-            animation: pulse-once 1s ease-in-out;
-        }
-        @keyframes pulse-once {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-            100% { transform: scale(1); }
-        }
-        /* Custom styles for the table */
-        .table-cell-fixed {
-            width: 15%; /* Adjust as needed */
         }
     </style>
 </head>
-<body class="bg-slate-950 text-gray-100 min-h-screen p-6 md:p-12 flex justify-center items-start">
+<body class="bg-slate-950 text-gray-100 min-h-screen p-6 md:p-12">
 
-    <div class="max-w-7xl w-full flex flex-col items-center">
+    <div class="max-w-7xl w-full mx-auto flex flex-col items-center">
         <header class="text-center mb-12 w-full">
             <h1 class="text-5xl font-extrabold tracking-tight text-white sm:text-6xl">
                 <span class="bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-indigo-600">Resume</span> Relevance Matcher
@@ -52,20 +31,18 @@
             <div id="jdPanel" class="bg-slate-900 p-8 rounded-3xl shadow-2xl flex flex-col h-full border border-slate-700">
                 <h2 class="text-3xl font-bold mb-6 text-purple-300">Job Requirements</h2>
                 <div class="flex-grow">
-                    <p class="text-gray-400 mb-6">Upload a job description file (.txt, .md) or paste text below.</p>
+                    <p class="text-gray-400 mb-6">Upload a job description file (.pdf, .docx) or paste text below.</p>
                     
                     <label class="block mb-3 text-sm font-medium text-gray-300">Upload Job Description</label>
-                    <input type="file" id="jdFileInput" accept=".txt,.md,.pdf,.docx" class="block w-full text-sm text-gray-300
+                    <input type="file" id="jdFileInput" accept=".pdf,.docx" class="block w-full text-sm text-gray-300
                         file:mr-4 file:py-3 file:px-6 file:rounded-full file:border-0
                         file:text-sm file:font-semibold file:bg-gradient-to-r from-purple-600 to-indigo-600 file:text-white
                         hover:file:from-purple-700 hover:file:to-indigo-700 transition-colors duration-300 cursor-pointer">
                     
-                    <div class="my-6 text-center text-gray-500 relative">
-                        <span class="bg-slate-900 px-2 text-sm">OR</span>
-                    </div>
+                    <div class="my-6 text-center text-gray-500 relative"><span class="bg-slate-900 px-2 text-sm">OR</span></div>
 
                     <label for="jdTextArea" class="block mb-3 text-sm font-medium text-gray-300">Paste Job Description</label>
-                    <textarea id="jdTextArea" rows="12" class="block p-4 w-full text-sm text-gray-100 bg-slate-800 rounded-lg border border-slate-700 focus:ring-purple-500 focus:border-purple-500 placeholder-gray-500 transition-colors duration-200" placeholder="Paste your job description here..."></textarea>
+                    <textarea id="jdTextArea" rows="12" class="block p-4 w-full text-sm text-gray-100 bg-slate-800 rounded-lg border border-slate-700 focus:ring-purple-500 focus:border-purple-500" placeholder="Paste your job description here..."></textarea>
                 </div>
 
                 <button id="processJdBtn" class="mt-8 w-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-bold py-4 px-8 rounded-xl shadow-lg hover:shadow-purple-500/30 transition-shadow duration-300 transform hover:scale-105">
@@ -82,24 +59,16 @@
                         <div>
                             <h3 class="text-xl font-bold text-white mb-3">About This Tool</h3>
                             <p class="text-gray-400 text-base">
-                                The Resume Relevance Matcher is a smart tool for recruiters. It automates manual screening by intelligently comparing resumes against job requirements, helping you save time, reduce bias, and quickly identify the most qualified candidates.
+                                This tool automates resume screening by intelligently comparing resumes against job requirements, helping you save time, reduce bias, and quickly identify the most qualified candidates.
                             </p>
                         </div>
                         <div>
                             <h3 class="text-xl font-bold text-white mb-4">How It Works</h3>
                             <ol class="space-y-4 text-gray-400">
-                                <li class="flex items-start"><span class="bg-purple-900/50 text-purple-300 font-bold rounded-full w-7 h-7 text-center leading-7 mr-4 flex-shrink-0">1</span><span><b>Process Job Description:</b> Upload a file or paste text to identify key skills for the role.</span></li>
-                                <li class="flex items-start"><span class="bg-purple-900/50 text-purple-300 font-bold rounded-full w-7 h-7 text-center leading-7 mr-4 flex-shrink-0">2</span><span><b>Upload Resumes:</b> Add one or more candidate resumes for analysis against the job requirements.</span></li>
-                                <li class="flex items-start"><span class="bg-purple-900/50 text-purple-300 font-bold rounded-full w-7 h-7 text-center leading-7 mr-4 flex-shrink-0">3</span><span><b>Get Instant Analysis:</b> View a ranked list of candidates to see who is the best fit and why.</span></li>
+                                <li class="flex items-start"><span class="bg-purple-900/50 text-purple-300 font-bold rounded-full w-7 h-7 text-center leading-7 mr-4 flex-shrink-0">1</span><span><b>Process JD:</b> Upload or paste a job description.</span></li>
+                                <li class="flex items-start"><span class="bg-purple-900/50 text-purple-300 font-bold rounded-full w-7 h-7 text-center leading-7 mr-4 flex-shrink-0">2</span><span><b>Upload Resumes:</b> Add one or more resumes.</span></li>
+                                <li class="flex items-start"><span class="bg-purple-900/50 text-purple-300 font-bold rounded-full w-7 h-7 text-center leading-7 mr-4 flex-shrink-0">3</span><span><b>Get Analysis:</b> View a ranked list of candidates.</span></li>
                             </ol>
-                        </div>
-                        <div>
-                            <h3 class="text-xl font-bold text-white mb-4">Key Features</h3>
-                             <ul class="space-y-3 text-gray-400">
-                                <li class="flex items-center"><span class="text-green-400 mr-3 text-lg">✅</span><span><b>AI-Powered Skill Matching:</b> Goes beyond keywords to understand skill context and relevance.</span></li>
-                                <li class="flex items-center"><span class="text-green-400 mr-3 text-lg">✅</span><span><b>Data-Driven Candidate Ranking:</b> Focus on top applicants first with a clear, data-driven score.</span></li>
-                                <li class="flex items-center"><span class="text-green-400 mr-3 text-lg">✅</span><span><b>In-Depth Match Reports:</b> Get detailed comparisons of qualifications against job needs.</span></li>
-                             </ul>
                         </div>
                     </div>
 
@@ -112,10 +81,10 @@
                             <div class="mt-6">
                                 <label class="block mb-3 text-sm font-medium text-gray-300">Upload Resumes (multiple allowed)</label>
                                 <input type="file" id="resumeFileInput" accept=".pdf,.docx" multiple class="block w-full text-sm text-gray-300
-                                    file:mr-4 file:py-3 file:px-6 file:rounded-full file:border-0
-                                    file:text-sm file:font-semibold file:bg-gradient-to-r from-purple-600 to-indigo-600 file:text-white
-                                    hover:file:from-purple-700 hover:file:to-indigo-700 transition-colors duration-300 cursor-pointer">
-                                <p id="resumeFileCount" class="mt-2 text-sm text-gray-400 block hidden"></p>
+                                    file:mr-4 file:py-3 file:px-6 file:rounded-full file:border-0 file:text-sm file:font-semibold
+                                    file:bg-gradient-to-r from-purple-600 to-indigo-600 file:text-white
+                                    hover:file:from-purple-700 hover:file:to-indigo-700 transition-colors cursor-pointer">
+                                <p id="resumeFileCount" class="mt-2 text-sm text-gray-400 hidden"></p>
                             </div>
                         </div>
                          <button id="analyzeAllBtn" class="mt-8 w-full bg-indigo-600 text-white font-bold py-4 px-8 rounded-xl shadow-lg hover:bg-indigo-700 transition-colors duration-300 transform hover:scale-105">
@@ -123,13 +92,13 @@
                         </button>
                     </div>
 
-                    <div id="loadingState" class="hidden flex-grow flex items-center justify-center p-12 lg:p-24">
+                    <div id="loadingState" class="hidden flex-grow flex items-center justify-center p-12">
                         <div class="flex flex-col items-center">
-                            <svg class="animate-spin-slow h-16 w-16 text-purple-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <svg class="animate-spin h-16 w-16 text-purple-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                             </svg>
-                            <p class="mt-4 text-lg text-gray-400">Analyzing all resumes... Please wait.</p>
+                            <p class="mt-4 text-lg text-gray-400">Analyzing resumes... Please wait.</p>
                         </div>
                     </div>
                 
@@ -137,35 +106,25 @@
                         <div class="flex-grow">
                             <h3 class="text-2xl font-bold text-white mb-4">Analysis Summary</h3>
                             <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8 text-center">
-                                <div class="bg-slate-700 p-4 rounded-xl">
-                                    <h4 class="text-gray-400 text-sm font-semibold">Total Resumes</h4>
-                                    <p id="totalCount" class="text-2xl font-bold text-white mt-1">0</p>
-                                </div>
-                                <div class="bg-slate-700 p-4 rounded-xl">
-                                    <h4 class="text-gray-400 text-sm font-semibold">High Verdict</h4>
-                                    <p id="highCount" class="text-2xl font-bold text-green-400 mt-1">0</p>
-                                </div>
-                                <div class="bg-slate-700 p-4 rounded-xl">
-                                    <h4 class="text-gray-400 text-sm font-semibold">Medium Verdict</h4>
-                                    <p id="mediumCount" class="text-2xl font-bold text-yellow-400 mt-1">0</p>
-                                </div>
+                                <div class="bg-slate-700 p-4 rounded-xl"><h4 class="text-gray-400 text-sm font-semibold">Total</h4><p id="totalCount" class="text-2xl font-bold text-white mt-1">0</p></div>
+                                <div class="bg-slate-700 p-4 rounded-xl"><h4 class="text-gray-400 text-sm font-semibold">High</h4><p id="highCount" class="text-2xl font-bold text-green-400 mt-1">0</p></div>
+                                <div class="bg-slate-700 p-4 rounded-xl"><h4 class="text-gray-400 text-sm font-semibold">Medium</h4><p id="mediumCount" class="text-2xl font-bold text-yellow-400 mt-1">0</p></div>
                             </div>
 
                             <h3 class="text-2xl font-bold text-white mb-4">Detailed Results</h3>
                             <div class="overflow-x-auto rounded-lg shadow-lg">
                                 <table class="min-w-full bg-slate-700">
-                                    <thead>
-                                        <tr class="bg-slate-600 text-left text-sm font-semibold text-gray-200 uppercase">
-                                            <th class="py-3 px-4 rounded-tl-lg table-cell-fixed">Candidate Name</th>
-                                            <th class="py-3 px-4 table-cell-fixed">Score</th>
-                                            <th class="py-3 px-4 table-cell-fixed">Verdict</th>
+                                    <thead class="bg-slate-600 text-left text-sm font-semibold text-gray-200 uppercase">
+                                        <tr>
+                                            <th class="py-3 px-4 rounded-tl-lg">Resume File</th>
+                                            <th class="py-3 px-4">Score</th>
+                                            <th class="py-3 px-4">Verdict</th>
                                             <th class="py-3 px-4">Missing Skills</th>
                                             <th class="py-3 px-4">Candidate Email</th>
                                             <th class="py-3 px-4 rounded-tr-lg">Suggestions</th>
                                         </tr>
                                     </thead>
-                                    <tbody id="resultsTableBody" class="divide-y divide-slate-600">
-                                        </tbody>
+                                    <tbody id="resultsTableBody" class="divide-y divide-slate-600"></tbody>
                                 </table>
                             </div>
                         </div>
@@ -182,257 +141,129 @@
         <div class="bg-slate-800 p-6 rounded-xl shadow-2xl text-center max-w-sm">
             <h3 id="messageTitle" class="text-xl font-bold mb-2 text-white"></h3>
             <p id="messageText" class="text-gray-300 mb-4"></p>
-            <button id="closeMessageBtn" class="bg-indigo-500 text-white font-semibold py-2 px-6 rounded-lg hover:bg-indigo-600 transition-colors duration-200">OK</button>
+            <button id="closeMessageBtn" class="bg-indigo-500 text-white font-semibold py-2 px-6 rounded-lg hover:bg-indigo-600">OK</button>
         </div>
     </div>
 
     <script>
-        // Use a message box instead of window.alert() and window.confirm()
         const messageBox = document.getElementById('messageBox');
         const messageTitle = document.getElementById('messageTitle');
         const messageText = document.getElementById('messageText');
-        const closeMessageBtn = document.getElementById('closeMessageBtn');
-
+        document.getElementById('closeMessageBtn').addEventListener('click', () => messageBox.style.display = 'none');
         function showMessage(title, message) {
             messageTitle.textContent = title;
             messageText.textContent = message;
             messageBox.style.display = 'flex';
         }
 
-        closeMessageBtn.addEventListener('click', () => {
-            messageBox.style.display = 'none';
-        });
-
-        // UI Element References
         const processJdBtn = document.getElementById('processJdBtn');
         const jdFileInput = document.getElementById('jdFileInput');
         const jdTextArea = document.getElementById('jdTextArea');
         const resumeFileInput = document.getElementById('resumeFileInput');
-        const resumeFileCountSpan = document.getElementById('resumeFileCount');
         const analyzeAllBtn = document.getElementById('analyzeAllBtn');
         const jdPanel = document.getElementById('jdPanel');
-
         const dashboardPanel = document.getElementById('dashboardPanel');
         const initialState = document.getElementById('initialState');
         const jdDisplayState = document.getElementById('jdDisplayState');
-        const jdContentDisplay = document.getElementById('jdContentDisplay');
         const loadingState = document.getElementById('loadingState');
         const resultsState = document.getElementById('resultsState');
-        const totalCountSpan = document.getElementById('totalCount');
-        const highCountSpan = document.getElementById('highCount');
-        const mediumCountSpan = document.getElementById('mediumCount');
-        const resultsTableBody = document.getElementById('resultsTableBody');
         const mainContentGrid = document.getElementById('main-content-grid');
-        const startOverBtn = document.getElementById('startOverBtn');
-
-        let isJdProcessed = false;
+        const API_URL = '/api';
         let jobDescriptionData = null;
         let selectedResumes = [];
-        // Use a robust, simplified API endpoint for Vercel
-        const API_URL = '/api';
-
-
-        // --- Event Listeners ---
 
         processJdBtn.addEventListener('click', async () => {
             if (jdTextArea.value.trim() === '' && jdFileInput.files.length === 0) {
-                showMessage('Error', 'Please upload a file or paste a job description.');
-                return;
+                return showMessage('Error', 'Please upload or paste a job description.');
             }
-
             if (jdFileInput.files.length > 0) {
-                const file = jdFileInput.files[0];
                 const reader = new FileReader();
-                reader.onload = async function(e) {
+                reader.onload = e => {
                     jobDescriptionData = e.target.result;
-                    displayProcessedJd(file.name);
+                    displayProcessedJd(jdFileInput.files[0].name);
                 };
-                reader.onerror = function() {
-                    showMessage('Error', 'Failed to read the file.');
-                };
-                reader.readAsDataURL(file);
+                reader.readAsDataURL(jdFileInput.files[0]);
             } else {
                 jobDescriptionData = jdTextArea.value;
                 displayProcessedJd("Pasted Text");
             }
         });
 
-        jdFileInput.addEventListener('change', () => {
-            if (jdFileInput.files.length > 0) {
-                jdTextArea.value = '';
-            }
-        });
-
-        jdTextArea.addEventListener('input', () => {
-            if (jdTextArea.value.length > 0) {
-                jdFileInput.value = '';
-            }
-        });
-
-        resumeFileInput.addEventListener('change', (event) => {
-            selectedResumes = Array.from(event.target.files);
-            if (selectedResumes.length > 0) {
-                resumeFileCountSpan.textContent = `${selectedResumes.length} files selected.`;
-                resumeFileCountSpan.classList.remove('hidden');
-            } else {
-                resumeFileCountSpan.classList.add('hidden');
-            }
-        });
-        
         analyzeAllBtn.addEventListener('click', () => {
-            if (!isJdProcessed) {
-                showMessage('Error', 'Please process a job description first.');
-                return;
-            }
-            if (selectedResumes.length === 0) {
-                showMessage('Error', 'Please upload one or more resume files.');
-                return;
-            }
+            if (!jobDescriptionData) return showMessage('Error', 'Please process a job description first.');
+            if (selectedResumes.length === 0) return showMessage('Error', 'Please upload one or more resumes.');
             runAnalysisWithBackend();
         });
 
-        startOverBtn.addEventListener('click', () => {
-            // Reset layout
-            jdPanel.classList.remove('hidden');
-            mainContentGrid.classList.add('lg:grid-cols-3');
-            mainContentGrid.classList.remove('lg:grid-cols-1');
-            dashboardPanel.classList.add('lg:col-span-2');
+        document.getElementById('startOverBtn').addEventListener('click', () => location.reload());
+        resumeFileInput.addEventListener('change', e => selectedResumes = Array.from(e.target.files));
 
-            // Reset dashboard states to initial
-            resultsState.classList.add('hidden');
-            resultsState.classList.remove('flex'); // remove flex display
-            jdDisplayState.classList.add('hidden');
-            loadingState.classList.add('hidden');
-            initialState.classList.remove('hidden');
-
-            // Reset state variables and inputs
-            isJdProcessed = false;
-            jobDescriptionData = null;
-            selectedResumes = [];
-            jdFileInput.value = '';
-            jdTextArea.value = '';
-            resumeFileInput.value = '';
-            resumeFileCountSpan.textContent = '';
-            resumeFileCountSpan.classList.add('hidden');
-            resultsTableBody.innerHTML = '';
-        });
-
-        // --- Functions ---
         function displayProcessedJd(name) {
-            jdContentDisplay.textContent = `Processed JD from: ${name}`;
+            document.getElementById('jdContentDisplay').textContent = `Processed JD from: ${name}`;
             initialState.classList.add('hidden');
             jdDisplayState.classList.remove('hidden');
             jdDisplayState.classList.add('flex');
-            isJdProcessed = true;
-            resultsState.classList.add('hidden');
-            resultsState.classList.remove('flex');
-            loadingState.classList.add('hidden');
         }
 
         async function runAnalysisWithBackend() {
-            // Adjust layout for loading/results
             jdPanel.classList.add('hidden');
             mainContentGrid.classList.remove('lg:grid-cols-3');
             mainContentGrid.classList.add('lg:grid-cols-1');
             dashboardPanel.classList.remove('lg:col-span-2');
-
-            // Show loading state
-            initialState.classList.add('hidden');
             jdDisplayState.classList.add('hidden');
-            jdDisplayState.classList.remove('flex');
-            resultsState.classList.add('hidden');
-            resultsState.classList.remove('flex');
             loadingState.classList.remove('hidden');
             
-            const resumesData = await Promise.all(selectedResumes.map(async (file) => {
-                return new Promise((resolve, reject) => {
-                    const reader = new FileReader();
-                    reader.onload = () => resolve({
-                        fileName: file.name,
-                        content: reader.result
-                    });
-                    reader.onerror = reject;
-                    reader.readAsDataURL(file);
-                });
-            }));
+            const resumesData = await Promise.all(selectedResumes.map(file => new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve({ fileName: file.name, content: reader.result });
+                reader.onerror = reject;
+                reader.readAsDataURL(file);
+            })));
 
             try {
                 const response = await fetch(API_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        job_description: jobDescriptionData,
-                        resumes: resumesData
-                    })
+                    body: JSON.stringify({ job_description: jobDescriptionData, resumes: resumesData })
                 });
-
                 if (!response.ok) {
-                    const errorData = await response.json().catch(() => ({}));
-                    const errorMessage = errorData.error || `HTTP error! status: ${response.status}. Please check the server logs.`;
-                    throw new Error(errorMessage);
+                    const err = await response.json().catch(() => ({}));
+                    throw new Error(err.error || `HTTP error! Status: ${response.status}`);
                 }
-
-                const results = await response.json();
-                showResults(results);
-
+                showResults(await response.json());
             } catch (error) {
-                loadingState.classList.add('hidden');
-                // Restore the 'start over' button if analysis fails
-                startOverBtn.click(); 
-                console.error('Error during analysis:', error);
-                showMessage('Analysis Failed', `Could not connect to the backend. Error: ${error.message}`);
+                showMessage('Analysis Failed', `Could not connect to the backend. ${error.message}`);
+                location.reload();
             }
         }
 
         function showResults(results) {
             loadingState.classList.add('hidden');
             resultsState.classList.remove('hidden');
-            resultsState.classList.add('flex'); // Use flex to enable button at bottom
+            resultsState.classList.add('flex');
 
-            // Sort results by score in descending order
             results.sort((a, b) => b.score - a.score);
+            
+            document.getElementById('totalCount').textContent = results.length;
+            document.getElementById('highCount').textContent = results.filter(r => r.verdict === 'High').length;
+            document.getElementById('mediumCount').textContent = results.filter(r => r.verdict === 'Medium').length;
 
-            // Update summary counts
-            totalCountSpan.textContent = results.length;
-            let highCount = 0;
-            let mediumCount = 0;
-            results.forEach(res => {
-                if (res.verdict === 'High') highCount++;
-                else if (res.verdict === 'Medium') mediumCount++;
-            });
-            highCountSpan.textContent = highCount;
-            mediumCountSpan.textContent = mediumCount;
-
-            // Populate the table
+            const resultsTableBody = document.getElementById('resultsTableBody');
             resultsTableBody.innerHTML = '';
-            results.forEach((res) => {
-                let verdictColor = 'text-red-400';
-                if (res.verdict === 'High') verdictColor = 'text-green-400';
-                else if (res.verdict === 'Medium') verdictColor = 'text-yellow-400';
-                
-                const missingSkillsHtml = res.missingSkills.map(s => `<li class="break-words">${s}</li>`).join('') || '<li>None</li>';
-
-                let suggestionsHtml = '<li>No suggestions available.</li>';
-                if (typeof res.suggestions === 'string' && res.suggestions.trim().length > 0) {
-                    const suggestionsArray = res.suggestions.split(/[.\n]/).filter(s => s.trim().length > 0);
-                    suggestionsHtml = suggestionsArray.map(item => `<li class="break-words">${item.trim()}</li>`).join('');
-                }
+            results.forEach(res => {
+                let verdictColor = res.verdict === 'High' ? 'text-green-400' : res.verdict === 'Medium' ? 'text-yellow-400' : 'text-red-400';
+                const missingSkillsHtml = res.missingSkills.map(s => `<li>${s}</li>`).join('') || '<li>None</li>';
+                const suggestionsHtml = (res.suggestions || '').split(/[\n•-]/).filter(s => s.trim()).map(s => `<li>${s.trim()}</li>`).join('');
                 
                 const row = document.createElement('tr');
                 row.className = 'hover:bg-slate-600 transition-colors duration-200';
                 row.innerHTML = `
-                    <td class="py-4 px-4 text-sm font-medium text-gray-300 align-top">${res.candidateName}</td>
+                    <td class="py-4 px-4 text-sm font-medium text-gray-300 align-top">${res.resumeName}</td>
                     <td class="py-4 px-4 text-sm font-semibold align-top">${res.score}</td>
                     <td class="py-4 px-4 text-sm font-semibold ${verdictColor} align-top">${res.verdict}</td>
-                    <td class="py-4 px-4 text-sm text-gray-400 align-top">
-                        <ul class="list-disc list-inside">${missingSkillsHtml}</ul>
-                    </td>
-                    <td class="py-4 px-4 text-sm text-blue-400 align-top">
-                      <a href="mailto:${res.candidateEmail}">${res.candidateEmail}</a>
-                    </td>
-                    <td class="py-4 px-4 text-sm text-gray-400 whitespace-pre-wrap align-top">
-                        <ul class="list-disc list-inside">${suggestionsHtml}</ul>
-                    </td>
+                    <td class="py-4 px-4 text-sm text-gray-400 align-top"><ul class="list-disc list-inside">${missingSkillsHtml}</ul></td>
+                    <td class="py-4 px-4 text-sm text-blue-400 align-top"><a href="mailto:${res.candidateEmail}">${res.candidateEmail}</a></td>
+                    <td class="py-4 px-4 text-sm text-gray-400 align-top"><ul class="list-disc list-inside">${suggestionsHtml || '<li>None</li>'}</ul></td>
                 `;
                 resultsTableBody.appendChild(row);
             });
@@ -440,3 +271,4 @@
     </script>
 </body>
 </html>
+
