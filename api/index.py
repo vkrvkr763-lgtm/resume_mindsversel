@@ -46,7 +46,6 @@ JSON Response:
         chain = LLMChain(llm=llm, prompt=prompt)
         response_text = chain.invoke({"resume": resume_text, "jd": jd_text}).get("text", "{}")
         
-        # More robust JSON parsing
         json_match = re.search(r'\{.*\}', response_text, re.DOTALL)
         if not json_match:
             print(f"[api] AI response did not contain JSON: {response_text}")
@@ -58,35 +57,22 @@ JSON Response:
         score_val = parsed_json.get("score", 0)
         suggestions_val = parsed_json.get("suggestions", "No suggestions generated.")
         
-        # Normalize score to be out of 50 for the semantic portion of the total score
         normalized_score = (int(score_val) / 100) * 50
         
         return {"score": max(0, min(normalized_score, 50)), "suggestions": suggestions_val}
     except Exception as e:
-        # This will now catch JSON parsing errors and other issues more gracefully
         print(f"[api] Critical error in get_llm_analysis: {e}")
         return {"score": 0, "suggestions": "Could not get AI feedback. Please try again."}
 
 # --- Text extraction and keyword matching logic ---
 STOP_WORDS = {'and', 'the', 'of', 'in', 'to', 'a', 'with', 'for', 'on', 'is', 'are', 'an'}
-
-# UPDATED: Significantly expanded the list of known skills for better accuracy
 KNOWN_SKILLS = {
-    # Programming Languages
     'python', 'java', 'javascript', 'typescript', 'c#', 'c++', 'php', 'ruby', 'go', 'swift', 'kotlin', 'sql', 'nosql',
-    # Web Development
     'html', 'css', 'react', 'angular', 'vue', 'nodejs', 'express', 'django', 'flask', 'fastapi',
-    # Cloud & DevOps
     'aws', 'azure', 'gcp', 'docker', 'kubernetes', 'terraform', 'ansible', 'jenkins', 'ci/cd',
-    # Data Science & ML
     'machine learning', 'deep learning', 'tensorflow', 'pytorch', 'scikit-learn', 'pandas', 'numpy', 'matplotlib',
-    'data analysis', 'data visualization', 'tableau', 'power bi',
-    # Databases
-    'mysql', 'postgresql', 'mongodb', 'redis', 'elasticsearch',
-    # Other Tech
-    'git', 'linux', 'rest api', 'graphql', 'agile', 'scrum',
-    # Soft Skills
-    'communication', 'teamwork', 'problem solving', 'leadership', 'project management', 'collaboration'
+    'data analysis', 'data visualization', 'tableau', 'power bi', 'mysql', 'postgresql', 'mongodb', 'redis', 
+    'git', 'linux', 'rest api', 'graphql', 'agile', 'scrum', 'communication', 'teamwork', 'problem solving'
 }
 
 def extract_text_from_pdf(file_bytes: bytes) -> str:
@@ -105,27 +91,17 @@ def extract_text_from_docx(file_bytes: bytes) -> str:
         return ""
 
 def get_hard_match_score(resume_text: str, jd_text: str):
-    jd_words = set(re.findall(r'\b\w+\b', jd_text.lower()))
-    resume_words = set(re.findall(r'\b\w+\b', resume_text.lower()))
-    
-    # Find which of our known skills are mentioned in the Job Description
     jd_skills = {skill for skill in KNOWN_SKILLS if skill in jd_text.lower()}
-    
     if not jd_skills:
-        # If no relevant skills are in the JD, we can't calculate a hard score fairly.
         return 0.0, [], []
-
-    # Find which of the required JD skills are also in the resume
     resume_skills_present = {skill for skill in KNOWN_SKILLS if skill in resume_text.lower()}
     matched = jd_skills.intersection(resume_skills_present)
     missing = jd_skills.difference(resume_skills_present)
-    
-    # The score is the ratio of matched skills to the skills required by the JD
     score = (len(matched) / len(jd_skills)) * 50 if jd_skills else 0
     return score, sorted(list(matched)), sorted(list(missing))
 
 # ==============================================================================
-# MAIN HANDLER FOR VERCEL
+# MAIN HANDLER FOR VERCEL (NOW PROCESSES ONE RESUME AT A TIME)
 # ==============================================================================
 class handler(BaseHTTPRequestHandler):
     def do_POST(self):
@@ -135,7 +111,15 @@ class handler(BaseHTTPRequestHandler):
             body = json.loads(post_data_bytes.decode('utf-8'))
             
             job_description_data = body.get('job_description', '')
-            resumes_data = body.get('resumes', [])
+            # UPDATED: Expect a single resume, not a list
+            resume_data = body.get('resume', None)
+
+            if not job_description_data or not resume_data:
+                self.send_response(400)
+                self.send_header('Content-type', 'application/json')
+                self.end_headers()
+                self.wfile.write(json.dumps({"error": "Missing job description or resume"}).encode('utf-8'))
+                return
 
             job_description_text = ""
             if isinstance(job_description_data, str) and job_description_data.startswith("data:"):
@@ -148,40 +132,39 @@ class handler(BaseHTTPRequestHandler):
             else:
                 job_description_text = job_description_data
 
-            results = []
-            for res in resumes_data:
-                file_name, content = res.get('fileName'), res.get('content')
-                header, base64_content = content.split(',', 1)
-                file_bytes = base64.b64decode(base64_content)
-                
-                resume_text = ""
-                if file_name.lower().endswith('.pdf'): resume_text = extract_text_from_pdf(file_bytes)
-                elif file_name.lower().endswith('.docx'): resume_text = extract_text_from_docx(file_bytes)
+            file_name, content = resume_data.get('fileName'), resume_data.get('content')
+            header, base64_content = content.split(',', 1)
+            file_bytes = base64.b64decode(base64_content)
+            
+            resume_text = ""
+            if file_name.lower().endswith('.pdf'): resume_text = extract_text_from_pdf(file_bytes)
+            elif file_name.lower().endswith('.docx'): resume_text = extract_text_from_docx(file_bytes)
 
-                if not resume_text: continue
+            if not resume_text:
+                raise ValueError("Could not read resume text.")
 
-                email_match = re.search(r'\b[A-Za-z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b', resume_text, re.IGNORECASE)
-                candidate_email = email_match.group(0) if email_match else "N/A"
+            email_match = re.search(r'\b[A-Za-z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b', resume_text, re.IGNORECASE)
+            candidate_email = email_match.group(0) if email_match else "N/A"
 
-                hard_score, matched_skills, missing_skills = get_hard_match_score(resume_text, job_description_text)
-                llm_results = get_llm_analysis(resume_text, job_description_text)
-                
-                total_score = round(hard_score + llm_results["score"])
-                verdict = "High" if total_score >= 80 else "Medium" if total_score >= 50 else "Low"
-                
-                results.append({
-                    "resumeName": file_name,
-                    "candidateEmail": candidate_email,
-                    "score": total_score,
-                    "verdict": verdict,
-                    "missingSkills": missing_skills,
-                    "suggestions": llm_results["suggestions"]
-                })
+            hard_score, matched_skills, missing_skills = get_hard_match_score(resume_text, job_description_text)
+            llm_results = get_llm_analysis(resume_text, job_description_text)
+            
+            total_score = round(hard_score + llm_results["score"])
+            verdict = "High" if total_score >= 80 else "Medium" if total_score >= 50 else "Low"
+            
+            result = {
+                "resumeName": file_name,
+                "candidateEmail": candidate_email,
+                "score": total_score,
+                "verdict": verdict,
+                "missingSkills": missing_skills,
+                "suggestions": llm_results["suggestions"]
+            }
             
             self.send_response(200)
             self.send_header('Content-type', 'application/json')
             self.end_headers()
-            self.wfile.write(json.dumps(results).encode('utf-8'))
+            self.wfile.write(json.dumps(result).encode('utf-8'))
 
         except Exception as e:
             self.send_response(500)
