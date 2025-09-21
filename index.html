@@ -52,7 +52,7 @@
             <div id="jdPanel" class="bg-slate-900 p-8 rounded-3xl shadow-2xl flex flex-col h-full border border-slate-700">
                 <h2 class="text-3xl font-bold mb-6 text-purple-300">Job Requirements</h2>
                 <div class="flex-grow">
-                    <p class="text-gray-400 mb-6">Upload a job description file (.txt, .md) or paste text below.</p>
+                    <p class="text-gray-400 mb-6">Upload a job description file (.txt, .md, .pdf, .docx) or paste text below.</p>
                     
                     <label class="block mb-3 text-sm font-medium text-gray-300">Upload Job Description</label>
                     <input type="file" id="jdFileInput" accept=".txt,.md,.pdf,.docx" class="block w-full text-sm text-gray-300
@@ -119,8 +119,8 @@
                             </div>
                         </div>
                          <button id="analyzeAllBtn" class="mt-8 w-full bg-indigo-600 text-white font-bold py-4 px-8 rounded-xl shadow-lg hover:bg-indigo-700 transition-colors duration-300 transform hover:scale-105">
-                            Analyze All Resumes
-                        </button>
+                             Analyze All Resumes
+                         </button>
                     </div>
 
                     <div id="loadingState" class="hidden flex-grow flex items-center justify-center p-12 lg:p-24">
@@ -135,7 +135,12 @@
                     
                     <div id="resultsState" class="hidden h-full flex-col">
                         <div class="flex-grow">
-                            <h3 class="text-2xl font-bold text-white mb-4">Analysis Summary</h3>
+                            <div class="flex justify-between items-center mb-4">
+                                <h3 class="text-2xl font-bold text-white">Analysis Summary</h3>
+                                <button id="downloadCsvBtn" class="bg-green-600 text-white font-bold py-2 px-5 rounded-lg shadow-md hover:bg-green-700 transition-colors duration-300 text-sm">
+                                    Download Results (CSV)
+                                </button>
+                            </div>
                             <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8 text-center">
                                 <div class="bg-slate-700 p-4 rounded-xl">
                                     <h4 class="text-gray-400 text-sm font-semibold">Total Resumes</h4>
@@ -156,28 +161,40 @@
                                 <table class="min-w-full bg-slate-700">
                                     <thead>
                                         <tr class="bg-slate-600 text-left text-sm font-semibold text-gray-200 uppercase">
-                                            <th class="py-3 px-4 rounded-tl-lg table-cell-fixed">Resume Name</th>
-                                            <th class="py-3 px-4 table-cell-fixed">Score</th>
-                                            <th class="py-3 px-4 table-cell-fixed">Verdict</th>
+                                            <th class="py-3 px-4 rounded-tl-lg">Resume PDF Name</th>
+                                            <th class="py-3 px-4">Score</th>
+                                            <th class="py-3 px-4">Verdict</th>
                                             <th class="py-3 px-4">Missing Skills</th>
                                             <th class="py-3 px-4">Candidate Email</th>
                                             <th class="py-3 px-4 rounded-tr-lg">Suggestions</th>
                                         </tr>
                                     </thead>
                                     <tbody id="resultsTableBody" class="divide-y divide-slate-600">
-                                    </tbody>
+                                        </tbody>
                                 </table>
                             </div>
+
+                            <!-- NEW: Post-Analysis Summary Section -->
+                            <div id="postAnalysisSummary" class="hidden mt-8 p-6 bg-slate-800 rounded-2xl border border-slate-700">
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                    <div>
+                                        <h4 class="text-xl font-bold text-white mb-3">Job Description Key Skills</h4>
+                                        <div id="jdSkillsList" class="space-y-2">
+                                            <!-- Skills will be populated here -->
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-xl font-bold text-white mb-3">Overall Feedback</h4>
+                                        <p id="overallFeedbackText" class="text-gray-300 text-base whitespace-pre-wrap">
+                                            <!-- Overall feedback will be populated here -->
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                        <div class="mt-8 flex flex-col sm:flex-row gap-4">
-                            <button id="startOverBtn" class="w-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-bold py-4 px-8 rounded-xl shadow-lg hover:shadow-purple-500/30 transition-shadow duration-300 transform hover:scale-105">
-                                Start New Analysis
-                            </button>
-                            <button id="downloadCsvBtn" class="w-full bg-green-600 text-white font-bold py-4 px-8 rounded-xl shadow-lg hover:bg-green-700 transition-colors duration-300 transform hover:scale-105 flex items-center justify-center gap-2">
-                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-download"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-                                Download Results
-                            </button>
-                        </div>
+                        <button id="startOverBtn" class="mt-8 w-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-bold py-4 px-8 rounded-xl shadow-lg hover:shadow-purple-500/30 transition-shadow duration-300 transform hover:scale-105">
+                            Start New Analysis
+                        </button>
                     </div>
                 </div>
             </div>
@@ -209,7 +226,7 @@
             messageBox.style.display = 'none';
         });
 
-        // UI Element References
+        // --- UI Element References ---
         const processJdBtn = document.getElementById('processJdBtn');
         const jdFileInput = document.getElementById('jdFileInput');
         const jdTextArea = document.getElementById('jdTextArea');
@@ -231,11 +248,14 @@
         const mainContentGrid = document.getElementById('main-content-grid');
         const startOverBtn = document.getElementById('startOverBtn');
         const downloadCsvBtn = document.getElementById('downloadCsvBtn');
+        const postAnalysisSummary = document.getElementById('postAnalysisSummary');
+        const jdSkillsList = document.getElementById('jdSkillsList');
+        const overallFeedbackText = document.getElementById('overallFeedbackText');
 
         let isJdProcessed = false;
         let jobDescriptionData = null;
         let selectedResumes = [];
-        // Use a robust, simplified API endpoint for Vercel
+        let analysisDataCache = null; 
         const API_URL = '/api';
 
 
@@ -311,20 +331,50 @@
             jdDisplayState.classList.add('hidden');
             loadingState.classList.add('hidden');
             initialState.classList.remove('hidden');
+            postAnalysisSummary.classList.add('hidden');
+
 
             // Reset state variables and inputs
             isJdProcessed = false;
             jobDescriptionData = null;
             selectedResumes = [];
+            analysisDataCache = null;
             jdFileInput.value = '';
             jdTextArea.value = '';
             resumeFileInput.value = '';
             resumeFileCountSpan.textContent = '';
             resumeFileCountSpan.classList.add('hidden');
             resultsTableBody.innerHTML = '';
+            jdSkillsList.innerHTML = '';
+            overallFeedbackText.textContent = '';
         });
 
-        downloadCsvBtn.addEventListener('click', downloadResultsAsCSV);
+        downloadCsvBtn.addEventListener('click', () => {
+            if (!analysisDataCache || !analysisDataCache.results || analysisDataCache.results.length === 0) {
+                showMessage('Error', 'No data available to download.');
+                return;
+            }
+            
+            const headers = ["Resume PDF Name", "Score", "Verdict", "Missing Skills", "Candidate Email", "Suggestions"];
+            const rows = analysisDataCache.results.map(res => [
+                `"${res.candidateName.replace(/"/g, '""')}"`,
+                res.score,
+                `"${res.verdict.replace(/"/g, '""')}"`,
+                `"${res.missingSkills.join(', ').replace(/"/g, '""')}"`,
+                `"${res.candidateEmail.replace(/"/g, '""')}"`,
+                `"${res.suggestions.replace(/"/g, '""').replace(/\n/g, ' ')}"`
+            ]);
+
+            let csvContent = "data:text/csv;charset=utf-8," + headers.join(",") + "\n" + rows.map(e => e.join(",")).join("\n");
+            
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", "resume_analysis_results.csv");
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        });
 
         // --- Functions ---
         function displayProcessedJd(name) {
@@ -381,8 +431,9 @@
                     throw new Error(errorMessage);
                 }
 
-                const results = await response.json();
-                showResults(results);
+                const data = await response.json();
+                analysisDataCache = data; // Cache the full data object
+                showResults(data);
 
             } catch (error) {
                 loadingState.classList.add('hidden');
@@ -393,11 +444,12 @@
             }
         }
 
-        function showResults(results) {
+        function showResults(data) {
             loadingState.classList.add('hidden');
             resultsState.classList.remove('hidden');
             resultsState.classList.add('flex'); // Use flex to enable button at bottom
 
+            const results = data.results || [];
             // Sort results by score in descending order
             results.sort((a, b) => b.score - a.score);
 
@@ -419,14 +471,10 @@
                 if (res.verdict === 'High') verdictColor = 'text-green-400';
                 else if (res.verdict === 'Medium') verdictColor = 'text-yellow-400';
                 
-                const missingSkillsHtml = res.missingSkills.map(s => `<li class="break-words">${s}</li>`).join('') || '<li>None</li>';
+                const missingSkillsHtml = res.missingSkills.length > 0 
+                    ? res.missingSkills.map(s => `<li class="break-words">${s}</li>`).join('') 
+                    : '<li>All key skills found!</li>';
 
-                let suggestionsHtml = '<li>No suggestions available.</li>';
-                if (typeof res.suggestions === 'string' && res.suggestions.trim().length > 0) {
-                     const suggestionsArray = res.suggestions.split(/[.\n]/).filter(s => s.trim().length > 0);
-                     suggestionsHtml = suggestionsArray.map(item => `<li class="break-words">${item.trim()}</li>`).join('');
-                }
-                
                 const row = document.createElement('tr');
                 row.className = 'hover:bg-slate-600 transition-colors duration-200';
                 row.innerHTML = `
@@ -439,61 +487,21 @@
                     <td class="py-4 px-4 text-sm text-blue-400 align-top">
                       <a href="mailto:${res.candidateEmail}">${res.candidateEmail}</a>
                     </td>
-                    <td class="py-4 px-4 text-sm text-gray-400 whitespace-pre-wrap align-top">
-                        <ul class="list-disc list-inside">${suggestionsHtml}</ul>
-                    </td>
+                    <td class="py-4 px-4 text-sm text-gray-400 whitespace-pre-wrap align-top">${res.suggestions}</td>
                 `;
                 resultsTableBody.appendChild(row);
             });
-        }
 
-        function downloadResultsAsCSV() {
-            const table = document.getElementById('resultsTableBody');
-            const headers = ["Candidate Name", "Score", "Verdict", "Missing Skills", "Candidate Email", "Suggestions"];
+            // Populate the new summary section
+            postAnalysisSummary.classList.remove('hidden');
             
-            const escapeCsv = (str) => {
-                if (str === null || str === undefined) return '';
-                str = String(str);
-                if (str.includes('"') || str.includes(',') || str.includes('\n')) {
-                    return `"${str.replace(/"/g, '""')}"`;
-                }
-                return str;
-            };
+            jdSkillsList.innerHTML = data.jobDescriptionSkills && data.jobDescriptionSkills.length > 0
+                ? data.jobDescriptionSkills.map(skill => `<div class="bg-slate-700 text-purple-300 text-sm font-medium px-3 py-1 rounded-full inline-block mr-2 mb-2">${skill}</div>`).join('')
+                : '<p class="text-gray-400">No specific skills were extracted from the job description.</p>';
 
-            let csvContent = headers.join(',') + '\n';
-
-            const rows = table.querySelectorAll('tr');
-            rows.forEach(row => {
-                const cells = row.querySelectorAll('td');
-                const rowData = [];
-                
-                rowData.push(escapeCsv(cells[0].textContent.trim()));
-                rowData.push(escapeCsv(cells[1].textContent.trim()));
-                rowData.push(escapeCsv(cells[2].textContent.trim()));
-                
-                const missingSkills = Array.from(cells[3].querySelectorAll('li')).map(li => li.textContent.trim()).join('; ');
-                rowData.push(escapeCsv(missingSkills));
-                
-                rowData.push(escapeCsv(cells[4].textContent.trim()));
-                
-                const suggestions = Array.from(cells[5].querySelectorAll('li')).map(li => li.textContent.trim()).join('; ');
-                rowData.push(escapeCsv(suggestions));
-                
-                csvContent += rowData.join(',') + '\n';
-            });
-
-            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement('a');
-            if (link.download !== undefined) {
-                const url = URL.createObjectURL(blob);
-                link.setAttribute('href', url);
-                link.setAttribute('download', 'resume_analysis_results.csv');
-                link.style.visibility = 'hidden';
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-            }
+            overallFeedbackText.textContent = data.overallFeedback || 'No overall feedback was generated.';
         }
     </script>
 </body>
 </html>
+
