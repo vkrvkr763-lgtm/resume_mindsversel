@@ -37,9 +37,7 @@
 </head>
 <body class="bg-slate-950 text-gray-100 min-h-screen p-6 md:p-12 flex justify-center items-start">
 
-    <!-- Main Container -->
     <div class="max-w-7xl w-full flex flex-col items-center">
-        <!-- Header -->
         <header class="text-center mb-12 w-full">
             <h1 class="text-5xl font-extrabold tracking-tight text-white sm:text-6xl">
                 <span class="bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-indigo-600">Resume</span> Relevance Matcher
@@ -49,10 +47,8 @@
             </p>
         </header>
 
-        <!-- Main Content Grid -->
         <div class="w-full grid grid-cols-1 lg:grid-cols-3 gap-8" id="main-content-grid">
 
-            <!-- Job Description Upload Panel (Placement Team) -->
             <div id="jdPanel" class="bg-slate-900 p-8 rounded-3xl shadow-2xl flex flex-col h-full border border-slate-700">
                 <h2 class="text-3xl font-bold mb-6 text-purple-300">Job Requirements</h2>
                 <div class="flex-grow">
@@ -77,14 +73,11 @@
                 </button>
             </div>
 
-            <!-- Dashboard & Results Panel (Central) -->
             <div id="dashboardPanel" class="bg-slate-900 p-8 rounded-3xl shadow-2xl flex flex-col h-full lg:col-span-2 border border-slate-700">
                 <h2 class="text-3xl font-bold mb-6 text-purple-300">Dashboard</h2>
                 
-                <!-- This container will hold the various states of the dashboard -->
                 <div class="flex-grow flex flex-col">
                     
-                    <!-- Initial State: Welcome message, guide, and features -->
                     <div id="initialState" class="text-gray-300 space-y-8">
                         <div>
                             <h3 class="text-xl font-bold text-white mb-3">About This Tool</h3>
@@ -110,14 +103,12 @@
                         </div>
                     </div>
 
-                    <!-- JD Display State -->
                     <div id="jdDisplayState" class="hidden flex-grow flex flex-col justify-center">
                         <div class="bg-slate-800/50 p-6 rounded-2xl border border-slate-700">
                             <h3 class="text-xl font-bold text-white mb-2">Processed Job Description</h3>
                             <div id="jdContentDisplay" class="bg-slate-800 p-4 rounded-xl overflow-y-auto max-h-48 text-gray-300 whitespace-pre-wrap text-sm border border-slate-700"></div>
                             <p class="text-gray-400 mt-6 text-center">Now, upload resumes for analysis.</p>
 
-                            <!-- Resume Upload Section -->
                             <div class="mt-6">
                                 <label class="block mb-3 text-sm font-medium text-gray-300">Upload Resumes (multiple allowed)</label>
                                 <input type="file" id="resumeFileInput" accept=".pdf,.docx" multiple class="block w-full text-sm text-gray-300
@@ -132,7 +123,6 @@
                         </button>
                     </div>
 
-                    <!-- Loading State -->
                     <div id="loadingState" class="hidden flex-grow flex items-center justify-center p-12 lg:p-24">
                         <div class="flex flex-col items-center">
                             <svg class="animate-spin-slow h-16 w-16 text-purple-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -143,11 +133,9 @@
                         </div>
                     </div>
                 
-                    <!-- Results Display State -->
                     <div id="resultsState" class="hidden h-full flex-col">
                         <div class="flex-grow">
                             <h3 class="text-2xl font-bold text-white mb-4">Analysis Summary</h3>
-                            <!-- Summary Grid -->
                             <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8 text-center">
                                 <div class="bg-slate-700 p-4 rounded-xl">
                                     <h4 class="text-gray-400 text-sm font-semibold">Total Resumes</h4>
@@ -164,7 +152,6 @@
                             </div>
 
                             <h3 class="text-2xl font-bold text-white mb-4">Detailed Results</h3>
-                            <!-- Results Table -->
                             <div class="overflow-x-auto rounded-lg shadow-lg">
                                 <table class="min-w-full bg-slate-700">
                                     <thead>
@@ -178,8 +165,7 @@
                                         </tr>
                                     </thead>
                                     <tbody id="resultsTableBody" class="divide-y divide-slate-600">
-                                        <!-- Results will be inserted here by JavaScript -->
-                                    </tbody>
+                                        </tbody>
                                 </table>
                             </div>
                         </div>
@@ -192,7 +178,6 @@
         </div>
     </div>
 
-    <!-- Message Box (replaces alert()) -->
     <div id="messageBox" class="fixed inset-0 bg-black bg-opacity-70 hidden items-center justify-center p-4 z-50">
         <div class="bg-slate-800 p-6 rounded-xl shadow-2xl text-center max-w-sm">
             <h3 id="messageTitle" class="text-xl font-bold mb-2 text-white"></h3>
@@ -243,7 +228,8 @@
         let isJdProcessed = false;
         let jobDescriptionData = null;
         let selectedResumes = [];
-        const API_URL = 'http://localhost:5000/analyze_resumes';
+        // Use a robust, simplified API endpoint for Vercel
+        const API_URL = '/api';
 
 
         // --- Event Listeners ---
@@ -394,7 +380,7 @@
                 // Restore the 'start over' button if analysis fails
                 startOverBtn.click(); 
                 console.error('Error during analysis:', error);
-                showMessage('Analysis Failed', `Could not connect to the backend. Please ensure it's running at ${API_URL}. Error: ${error.message}`);
+                showMessage('Analysis Failed', `Could not connect to the backend. Error: ${error.message}`);
             }
         }
 
@@ -452,6 +438,5 @@
             });
         }
     </script>
-
 </body>
 </html>
