@@ -11,12 +11,21 @@
     <style>
         body {
             font-family: 'Inter', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        .animate-spin-slow {
+            animation: spin 3s linear infinite;
+        }
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
         }
     </style>
 </head>
-<body class="bg-slate-950 text-gray-100 min-h-screen p-6 md:p-12">
+<body class="bg-slate-950 text-gray-100 min-h-screen p-6 md:p-12 flex justify-center items-start">
 
-    <div class="max-w-7xl w-full mx-auto flex flex-col items-center">
+    <div class="max-w-7xl w-full flex flex-col items-center">
         <header class="text-center mb-12 w-full">
             <h1 class="text-5xl font-extrabold tracking-tight text-white sm:text-6xl">
                 <span class="bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-indigo-600">Resume</span> Relevance Matcher
@@ -29,12 +38,12 @@
         <div class="w-full grid grid-cols-1 lg:grid-cols-3 gap-8" id="main-content-grid">
 
             <div id="jdPanel" class="bg-slate-900 p-8 rounded-3xl shadow-2xl flex flex-col h-full border border-slate-700">
-                <h2 class="text-3xl font-bold mb-6 text-purple-300">Job Requirements</h2>
+                <h2 class="text-3xl font-bold mb-6 text-purple-300">1. Job Requirements</h2>
                 <div class="flex-grow">
-                    <p class="text-gray-400 mb-6">Upload a job description file (.pdf, .docx) or paste text below.</p>
+                    <p class="text-gray-400 mb-6">Upload a job description file or paste text below.</p>
                     
                     <label class="block mb-3 text-sm font-medium text-gray-300">Upload Job Description</label>
-                    <input type="file" id="jdFileInput" accept=".pdf,.docx" class="block w-full text-sm text-gray-300
+                    <input type="file" id="jdFileInput" accept=".pdf,.docx,.txt" class="block w-full text-sm text-gray-300
                         file:mr-4 file:py-3 file:px-6 file:rounded-full file:border-0
                         file:text-sm file:font-semibold file:bg-gradient-to-r from-purple-600 to-indigo-600 file:text-white
                         hover:file:from-purple-700 hover:file:to-indigo-700 transition-colors duration-300 cursor-pointer">
@@ -51,84 +60,61 @@
             </div>
 
             <div id="dashboardPanel" class="bg-slate-900 p-8 rounded-3xl shadow-2xl flex flex-col h-full lg:col-span-2 border border-slate-700">
-                <h2 class="text-3xl font-bold mb-6 text-purple-300">Dashboard</h2>
+                <h2 class="text-3xl font-bold mb-6 text-purple-300">2. Analysis Dashboard</h2>
                 
                 <div class="flex-grow flex flex-col">
-                    
-                    <div id="initialState" class="text-gray-300 space-y-8">
-                        <div>
-                            <h3 class="text-xl font-bold text-white mb-3">About This Tool</h3>
-                            <p class="text-gray-400 text-base">
-                                This tool automates resume screening by intelligently comparing resumes against job requirements, helping you save time, reduce bias, and quickly identify the most qualified candidates.
-                            </p>
-                        </div>
-                        <div>
-                            <h3 class="text-xl font-bold text-white mb-4">How It Works</h3>
-                            <ol class="space-y-4 text-gray-400">
-                                <li class="flex items-start"><span class="bg-purple-900/50 text-purple-300 font-bold rounded-full w-7 h-7 text-center leading-7 mr-4 flex-shrink-0">1</span><span><b>Process JD:</b> Upload or paste a job description.</span></li>
-                                <li class="flex items-start"><span class="bg-purple-900/50 text-purple-300 font-bold rounded-full w-7 h-7 text-center leading-7 mr-4 flex-shrink-0">2</span><span><b>Upload Resumes:</b> Add one or more resumes.</span></li>
-                                <li class="flex items-start"><span class="bg-purple-900/50 text-purple-300 font-bold rounded-full w-7 h-7 text-center leading-7 mr-4 flex-shrink-0">3</span><span><b>Get Analysis:</b> View a ranked list of candidates.</span></li>
-                            </ol>
-                        </div>
+                    <div id="initialState" class="text-gray-300 space-y-6 flex-grow flex flex-col justify-center text-center">
+                        <svg class="mx-auto h-12 w-12 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                            <path vector-effect="non-scaling-stroke" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        <h3 class="text-lg font-medium text-white">Process a Job Description</h3>
+                        <p class="text-sm text-gray-400">Upload or paste a job description on the left to begin the analysis process.</p>
                     </div>
 
-                    <div id="jdDisplayState" class="hidden flex-grow flex flex-col justify-center">
+                    <div id="jdDisplayState" class="hidden flex-grow flex flex-col">
                         <div class="bg-slate-800/50 p-6 rounded-2xl border border-slate-700">
-                            <h3 class="text-xl font-bold text-white mb-2">Processed Job Description</h3>
-                            <div id="jdContentDisplay" class="bg-slate-800 p-4 rounded-xl overflow-y-auto max-h-48 text-gray-300 whitespace-pre-wrap text-sm border border-slate-700"></div>
-                            <p class="text-gray-400 mt-6 text-center">Now, upload resumes for analysis.</p>
-
+                            <h3 class="text-xl font-bold text-white mb-2">Job Description Ready</h3>
+                            <p id="jdContentDisplay" class="text-gray-400 text-sm"></p>
                             <div class="mt-6">
                                 <label class="block mb-3 text-sm font-medium text-gray-300">Upload Resumes (multiple allowed)</label>
                                 <input type="file" id="resumeFileInput" accept=".pdf,.docx" multiple class="block w-full text-sm text-gray-300
                                     file:mr-4 file:py-3 file:px-6 file:rounded-full file:border-0 file:text-sm file:font-semibold
-                                    file:bg-gradient-to-r from-purple-600 to-indigo-600 file:text-white
-                                    hover:file:from-purple-700 hover:file:to-indigo-700 transition-colors cursor-pointer">
-                                <p id="resumeFileCount" class="mt-2 text-sm text-gray-400 hidden"></p>
+                                    file:bg-gradient-to-r from-purple-600 to-indigo-600 file:text-white hover:file:from-purple-700 hover:file:to-indigo-700">
+                                <p id="resumeFileCount" class="mt-2 text-sm text-gray-400"></p>
                             </div>
                         </div>
-                         <button id="analyzeAllBtn" class="mt-8 w-full bg-indigo-600 text-white font-bold py-4 px-8 rounded-xl shadow-lg hover:bg-indigo-700 transition-colors duration-300 transform hover:scale-105">
-                            Analyze All Resumes
+                         <button id="analyzeAllBtn" disabled class="mt-8 w-full bg-indigo-800 text-gray-400 font-bold py-4 px-8 rounded-xl cursor-not-allowed">
+                            Analyze Resumes
                         </button>
                     </div>
 
-                    <div id="loadingState" class="hidden flex-grow flex items-center justify-center p-12">
-                        <div class="flex flex-col items-center">
-                            <svg class="animate-spin h-16 w-16 text-purple-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                            </svg>
-                            <p class="mt-4 text-lg text-gray-400">Analyzing resumes... Please wait.</p>
-                        </div>
-                    </div>
-                
                     <div id="resultsState" class="hidden h-full flex-col">
                         <div class="flex-grow">
-                            <h3 class="text-2xl font-bold text-white mb-4">Analysis Summary</h3>
-                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8 text-center">
-                                <div class="bg-slate-700 p-4 rounded-xl"><h4 class="text-gray-400 text-sm font-semibold">Total</h4><p id="totalCount" class="text-2xl font-bold text-white mt-1">0</p></div>
-                                <div class="bg-slate-700 p-4 rounded-xl"><h4 class="text-gray-400 text-sm font-semibold">High</h4><p id="highCount" class="text-2xl font-bold text-green-400 mt-1">0</p></div>
-                                <div class="bg-slate-700 p-4 rounded-xl"><h4 class="text-gray-400 text-sm font-semibold">Medium</h4><p id="mediumCount" class="text-2xl font-bold text-yellow-400 mt-1">0</p></div>
+                            <div class="flex justify-between items-center mb-4">
+                                <h3 class="text-2xl font-bold text-white">Analysis Results</h3>
+                                <div id="loadingIndicator" class="hidden items-center space-x-2">
+                                    <svg class="animate-spin h-5 w-5 text-purple-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                                    <span id="loadingText" class="text-sm text-gray-400"></span>
+                                </div>
                             </div>
-
-                            <h3 class="text-2xl font-bold text-white mb-4">Detailed Results</h3>
                             <div class="overflow-x-auto rounded-lg shadow-lg">
-                                <table class="min-w-full bg-slate-700">
-                                    <thead class="bg-slate-600 text-left text-sm font-semibold text-gray-200 uppercase">
-                                        <tr>
-                                            <th class="py-3 px-4 rounded-tl-lg">Resume File</th>
+                                <table class="min-w-full bg-slate-800">
+                                    <thead>
+                                        <tr class="bg-slate-700 text-left text-xs font-semibold text-gray-300 uppercase tracking-wider">
+                                            <th class="py-3 px-4">Resume File</th>
                                             <th class="py-3 px-4">Score</th>
                                             <th class="py-3 px-4">Verdict</th>
                                             <th class="py-3 px-4">Missing Skills</th>
                                             <th class="py-3 px-4">Candidate Email</th>
-                                            <th class="py-3 px-4 rounded-tr-lg">Suggestions</th>
+                                            <th class="py-3 px-4">Suggestions</th>
                                         </tr>
                                     </thead>
-                                    <tbody id="resultsTableBody" class="divide-y divide-slate-600"></tbody>
+                                    <tbody id="resultsTableBody" class="divide-y divide-slate-700">
+                                    </tbody>
                                 </table>
                             </div>
                         </div>
-                        <button id="startOverBtn" class="mt-8 w-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-bold py-4 px-8 rounded-xl shadow-lg hover:shadow-purple-500/30 transition-shadow duration-300 transform hover:scale-105">
+                        <button id="startOverBtn" class="mt-8 w-full bg-purple-600 text-white font-bold py-4 px-8 rounded-xl hover:bg-purple-700 transition-colors">
                             Start New Analysis
                         </button>
                     </div>
@@ -138,7 +124,7 @@
     </div>
 
     <div id="messageBox" class="fixed inset-0 bg-black bg-opacity-70 hidden items-center justify-center p-4 z-50">
-        <div class="bg-slate-800 p-6 rounded-xl shadow-2xl text-center max-w-sm">
+        <div class="bg-slate-800 p-6 rounded-xl shadow-2xl text-center max-w-sm border border-slate-700">
             <h3 id="messageTitle" class="text-xl font-bold mb-2 text-white"></h3>
             <p id="messageText" class="text-gray-300 mb-4"></p>
             <button id="closeMessageBtn" class="bg-indigo-500 text-white font-semibold py-2 px-6 rounded-lg hover:bg-indigo-600">OK</button>
@@ -146,128 +132,182 @@
     </div>
 
     <script>
-        const messageBox = document.getElementById('messageBox');
-        const messageTitle = document.getElementById('messageTitle');
-        const messageText = document.getElementById('messageText');
-        document.getElementById('closeMessageBtn').addEventListener('click', () => messageBox.style.display = 'none');
-        function showMessage(title, message) {
-            messageTitle.textContent = title;
-            messageText.textContent = message;
-            messageBox.style.display = 'flex';
-        }
-
+        // --- UI Elements ---
+        const jdPanel = document.getElementById('jdPanel');
         const processJdBtn = document.getElementById('processJdBtn');
         const jdFileInput = document.getElementById('jdFileInput');
         const jdTextArea = document.getElementById('jdTextArea');
         const resumeFileInput = document.getElementById('resumeFileInput');
+        const resumeFileCountSpan = document.getElementById('resumeFileCount');
         const analyzeAllBtn = document.getElementById('analyzeAllBtn');
-        const jdPanel = document.getElementById('jdPanel');
+        
         const dashboardPanel = document.getElementById('dashboardPanel');
         const initialState = document.getElementById('initialState');
         const jdDisplayState = document.getElementById('jdDisplayState');
-        const loadingState = document.getElementById('loadingState');
+        const jdContentDisplay = document.getElementById('jdContentDisplay');
         const resultsState = document.getElementById('resultsState');
-        const mainContentGrid = document.getElementById('main-content-grid');
-        const API_URL = '/api';
+        
+        const loadingIndicator = document.getElementById('loadingIndicator');
+        const loadingText = document.getElementById('loadingText');
+        const resultsTableBody = document.getElementById('resultsTableBody');
+        const startOverBtn = document.getElementById('startOverBtn');
+
+        const messageBox = document.getElementById('messageBox');
+        const messageTitle = document.getElementById('messageTitle');
+        const messageText = document.getElementById('messageText');
+        const closeMessageBtn = document.getElementById('closeMessageBtn');
+
+        // --- State ---
         let jobDescriptionData = null;
         let selectedResumes = [];
+        const API_URL = '/api';
+
+        // --- Functions ---
+        const showMessage = (title, message) => {
+            messageTitle.textContent = title;
+            messageText.textContent = message;
+            messageBox.style.display = 'flex';
+        };
+
+        const fileToBase64 = (file) => new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = () => resolve({ fileName: file.name, content: reader.result });
+            reader.onerror = error => reject(error);
+        });
+
+        const updateAnalyzeButtonState = () => {
+            if (jobDescriptionData && selectedResumes.length > 0) {
+                analyzeAllBtn.disabled = false;
+                analyzeAllBtn.classList.remove('bg-indigo-800', 'text-gray-400', 'cursor-not-allowed');
+                analyzeAllBtn.classList.add('bg-indigo-600', 'text-white', 'hover:bg-indigo-700');
+            } else {
+                analyzeAllBtn.disabled = true;
+                analyzeAllBtn.classList.add('bg-indigo-800', 'text-gray-400', 'cursor-not-allowed');
+                analyzeAllBtn.classList.remove('bg-indigo-600', 'text-white', 'hover:bg-indigo-700');
+            }
+        };
+
+        const displayProcessedJd = (name) => {
+            jdContentDisplay.textContent = `Using job description from: ${name}`;
+            initialState.classList.add('hidden');
+            jdDisplayState.classList.remove('hidden');
+            jdDisplayState.classList.add('flex');
+            updateAnalyzeButtonState();
+        };
+
+        const addResultToTable = (res) => {
+            let verdictColor = 'text-red-400';
+            if (res.verdict === 'High') verdictColor = 'text-green-400';
+            else if (res.verdict === 'Medium') verdictColor = 'text-yellow-400';
+
+            const missingSkillsHtml = res.missingSkills.length > 0
+                ? res.missingSkills.map(s => `<li>${s}</li>`).join('')
+                : '<li>None</li>';
+
+            const suggestionsHtml = (res.suggestions || "No suggestions available.")
+                .split(/\\n|[\n-]/)
+                .filter(s => s.trim().length > 0)
+                .map(item => `<li>${item.trim()}</li>`).join('');
+
+            const row = document.createElement('tr');
+            row.className = 'hover:bg-slate-700 transition-colors duration-200';
+            row.innerHTML = `
+                <td class="py-3 px-4 text-sm font-medium text-gray-200 align-top">${res.resumeName}</td>
+                <td class="py-3 px-4 text-sm font-semibold align-top">${res.score}</td>
+                <td class="py-3 px-4 text-sm font-semibold ${verdictColor} align-top">${res.verdict}</td>
+                <td class="py-3 px-4 text-sm text-gray-400 align-top"><ul class="list-disc list-inside">${missingSkillsHtml}</ul></td>
+                <td class="py-3 px-4 text-sm text-blue-400 align-top"><a href="mailto:${res.candidateEmail}">${res.candidateEmail}</a></td>
+                <td class="py-3 px-4 text-sm text-gray-400 align-top"><ul class="list-disc list-inside">${suggestionsHtml}</ul></td>
+            `;
+            resultsTableBody.appendChild(row);
+        };
+
+        const runAnalysis = async () => {
+            jdPanel.classList.add('hidden');
+            jdDisplayState.classList.add('hidden');
+            resultsState.classList.remove('hidden');
+            resultsState.classList.add('flex');
+            loadingIndicator.style.display = 'flex';
+            resultsTableBody.innerHTML = '';
+            analyzeAllBtn.disabled = true;
+
+            for (let i = 0; i < selectedResumes.length; i++) {
+                const file = selectedResumes[i];
+                loadingText.textContent = `Analyzing ${i + 1} of ${selectedResumes.length}: ${file.name}`;
+                try {
+                    const resumeData = await fileToBase64(file);
+                    const response = await fetch(API_URL, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            job_description: jobDescriptionData,
+                            resume: resumeData
+                        })
+                    });
+                    if (!response.ok) {
+                        const err = await response.json();
+                        throw new Error(err.error || 'Server error');
+                    }
+                    const result = await response.json();
+                    addResultToTable(result);
+                } catch (error) {
+                    console.error('Analysis failed for', file.name, error);
+                    addResultToTable({
+                        resumeName: file.name,
+                        score: 'N/A',
+                        verdict: 'Error',
+                        missingSkills: [],
+                        candidateEmail: 'N/A',
+                        suggestions: `Failed: ${error.message}`
+                    });
+                }
+            }
+            loadingText.textContent = 'Analysis Complete';
+            loadingIndicator.style.display = 'none';
+            analyzeAllBtn.disabled = false;
+        };
+
+        // --- Event Listeners ---
+        closeMessageBtn.addEventListener('click', () => messageBox.style.display = 'none');
 
         processJdBtn.addEventListener('click', async () => {
-            if (jdTextArea.value.trim() === '' && jdFileInput.files.length === 0) {
+            const file = jdFileInput.files[0];
+            const text = jdTextArea.value.trim();
+            if (!file && !text) {
                 return showMessage('Error', 'Please upload or paste a job description.');
             }
-            if (jdFileInput.files.length > 0) {
-                const reader = new FileReader();
-                reader.onload = e => {
-                    jobDescriptionData = e.target.result;
-                    displayProcessedJd(jdFileInput.files[0].name);
-                };
-                reader.readAsDataURL(jdFileInput.files[0]);
+            if (file) {
+                jobDescriptionData = await fileToBase64(file).then(f => f.content);
+                displayProcessedJd(file.name);
             } else {
-                jobDescriptionData = jdTextArea.value;
+                jobDescriptionData = text;
                 displayProcessedJd("Pasted Text");
             }
         });
 
-        analyzeAllBtn.addEventListener('click', () => {
-            if (!jobDescriptionData) return showMessage('Error', 'Please process a job description first.');
-            if (selectedResumes.length === 0) return showMessage('Error', 'Please upload one or more resumes.');
-            runAnalysisWithBackend();
+        resumeFileInput.addEventListener('change', (e) => {
+            selectedResumes = Array.from(e.target.files);
+            resumeFileCountSpan.textContent = `${selectedResumes.length} resume(s) selected.`;
+            updateAnalyzeButtonState();
         });
 
-        document.getElementById('startOverBtn').addEventListener('click', () => location.reload());
-        resumeFileInput.addEventListener('change', e => selectedResumes = Array.from(e.target.files));
-
-        function displayProcessedJd(name) {
-            document.getElementById('jdContentDisplay').textContent = `Processed JD from: ${name}`;
-            initialState.classList.add('hidden');
-            jdDisplayState.classList.remove('hidden');
-            jdDisplayState.classList.add('flex');
-        }
-
-        async function runAnalysisWithBackend() {
-            jdPanel.classList.add('hidden');
-            mainContentGrid.classList.remove('lg:grid-cols-3');
-            mainContentGrid.classList.add('lg:grid-cols-1');
-            dashboardPanel.classList.remove('lg:col-span-2');
-            jdDisplayState.classList.add('hidden');
-            loadingState.classList.remove('hidden');
+        analyzeAllBtn.addEventListener('click', runAnalysis);
+        
+        startOverBtn.addEventListener('click', () => {
+            jdPanel.classList.remove('hidden');
+            resultsState.classList.add('hidden');
+            resultsState.classList.remove('flex');
+            initialState.classList.remove('hidden');
             
-            const resumesData = await Promise.all(selectedResumes.map(file => new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.onload = () => resolve({ fileName: file.name, content: reader.result });
-                reader.onerror = reject;
-                reader.readAsDataURL(file);
-            })));
-
-            try {
-                const response = await fetch(API_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ job_description: jobDescriptionData, resumes: resumesData })
-                });
-                if (!response.ok) {
-                    const err = await response.json().catch(() => ({}));
-                    throw new Error(err.error || `HTTP error! Status: ${response.status}`);
-                }
-                showResults(await response.json());
-            } catch (error) {
-                showMessage('Analysis Failed', `Could not connect to the backend. ${error.message}`);
-                location.reload();
-            }
-        }
-
-        function showResults(results) {
-            loadingState.classList.add('hidden');
-            resultsState.classList.remove('hidden');
-            resultsState.classList.add('flex');
-
-            results.sort((a, b) => b.score - a.score);
-            
-            document.getElementById('totalCount').textContent = results.length;
-            document.getElementById('highCount').textContent = results.filter(r => r.verdict === 'High').length;
-            document.getElementById('mediumCount').textContent = results.filter(r => r.verdict === 'Medium').length;
-
-            const resultsTableBody = document.getElementById('resultsTableBody');
-            resultsTableBody.innerHTML = '';
-            results.forEach(res => {
-                let verdictColor = res.verdict === 'High' ? 'text-green-400' : res.verdict === 'Medium' ? 'text-yellow-400' : 'text-red-400';
-                const missingSkillsHtml = res.missingSkills.map(s => `<li>${s}</li>`).join('') || '<li>None</li>';
-                const suggestionsHtml = (res.suggestions || '').split(/[\n•-]/).filter(s => s.trim()).map(s => `<li>${s.trim()}</li>`).join('');
-                
-                const row = document.createElement('tr');
-                row.className = 'hover:bg-slate-600 transition-colors duration-200';
-                row.innerHTML = `
-                    <td class="py-4 px-4 text-sm font-medium text-gray-300 align-top">${res.resumeName}</td>
-                    <td class="py-4 px-4 text-sm font-semibold align-top">${res.score}</td>
-                    <td class="py-4 px-4 text-sm font-semibold ${verdictColor} align-top">${res.verdict}</td>
-                    <td class="py-4 px-4 text-sm text-gray-400 align-top"><ul class="list-disc list-inside">${missingSkillsHtml}</ul></td>
-                    <td class="py-4 px-4 text-sm text-blue-400 align-top"><a href="mailto:${res.candidateEmail}">${res.candidateEmail}</a></td>
-                    <td class="py-4 px-4 text-sm text-gray-400 align-top"><ul class="list-disc list-inside">${suggestionsHtml || '<li>None</li>'}</ul></td>
-                `;
-                resultsTableBody.appendChild(row);
-            });
-        }
+            jobDescriptionData = null;
+            selectedResumes = [];
+            jdFileInput.value = '';
+            jdTextArea.value = '';
+            resumeFileInput.value = '';
+            resumeFileCountSpan.textContent = '';
+            updateAnalyzeButtonState();
+        });
     </script>
 </body>
 </html>
