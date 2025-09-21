@@ -46,7 +46,6 @@ JSON Response:
         chain = LLMChain(llm=llm, prompt=prompt)
         response_text = chain.invoke({"resume": resume_text, "jd": jd_text}).get("text", "{}")
         
-        # More robust JSON parsing
         json_match = re.search(r'\{.*\}', response_text, re.DOTALL)
         if not json_match:
             print(f"[api] AI response did not contain JSON: {response_text}")
@@ -58,7 +57,6 @@ JSON Response:
         score_val = parsed_json.get("score", 0)
         suggestions_val = parsed_json.get("suggestions", "No suggestions generated.")
         
-        # Normalize score to be out of 50 for the semantic portion of the total score
         normalized_score = (int(score_val) / 100) * 50
         
         return {"score": max(0, min(normalized_score, 50)), "suggestions": suggestions_val}
@@ -67,8 +65,26 @@ JSON Response:
         return {"score": 0, "suggestions": "Error during AI analysis. Check Vercel logs."}
 
 # --- Text extraction and keyword matching logic ---
-STOP_WORDS = {'and', 'the', 'of', 'in', 'to', 'a', 'with', 'for', 'on', 'is', 'are'}
-KNOWN_SKILLS = {'python', 'java', 'sql', 'aws', 'docker', 'react', 'javascript', 'teamwork'}
+STOP_WORDS = {'and', 'the', 'of', 'in', 'to', 'a', 'with', 'for', 'on', 'is', 'are', 'an'}
+
+# UPDATED: Significantly expanded the list of known skills for better accuracy
+KNOWN_SKILLS = {
+    # Programming Languages
+    'python', 'java', 'javascript', 'typescript', 'c#', 'c++', 'php', 'ruby', 'go', 'swift', 'kotlin', 'sql', 'nosql',
+    # Web Development
+    'html', 'css', 'react', 'angular', 'vue', 'nodejs', 'express', 'django', 'flask', 'fastapi',
+    # Cloud & DevOps
+    'aws', 'azure', 'gcp', 'docker', 'kubernetes', 'terraform', 'ansible', 'jenkins', 'ci/cd',
+    # Data Science & ML
+    'machine learning', 'deep learning', 'tensorflow', 'pytorch', 'scikit-learn', 'pandas', 'numpy', 'matplotlib',
+    'data analysis', 'data visualization', 'tableau', 'power bi',
+    # Databases
+    'mysql', 'postgresql', 'mongodb', 'redis', 'elasticsearch',
+    # Other Tech
+    'git', 'linux', 'rest api', 'graphql', 'agile', 'scrum',
+    # Soft Skills
+    'communication', 'teamwork', 'problem solving', 'leadership', 'project management', 'collaboration'
+}
 
 def extract_text_from_pdf(file_bytes: bytes) -> str:
     try:
@@ -88,14 +104,20 @@ def extract_text_from_docx(file_bytes: bytes) -> str:
 def get_hard_match_score(resume_text: str, jd_text: str):
     jd_words = set(re.findall(r'\b\w+\b', jd_text.lower()))
     resume_words = set(re.findall(r'\b\w+\b', resume_text.lower()))
-    jd_skills = {w for w in jd_words if w not in STOP_WORDS and w in KNOWN_SKILLS}
+    
+    # Find which of our known skills are mentioned in the Job Description
+    jd_skills = {skill for skill in KNOWN_SKILLS if skill in jd_text.lower()}
+    
     if not jd_skills:
-        # If no relevant skills in JD, return 0 score but show what skills the resume DOES have
-        resume_known_skills = KNOWN_SKILLS.intersection(resume_words)
-        return 0.0, [], list(resume_known_skills)
-    resume_skills = KNOWN_SKILLS.intersection(resume_words)
-    matched = resume_skills.intersection(jd_skills)
-    missing = jd_skills.difference(resume_skills)
+        # If no relevant skills are in the JD, we can't calculate a hard score fairly.
+        return 0.0, [], []
+
+    # Find which of the required JD skills are also in the resume
+    resume_skills_present = {skill for skill in KNOWN_SKILLS if skill in resume_text.lower()}
+    matched = jd_skills.intersection(resume_skills_present)
+    missing = jd_skills.difference(resume_skills_present)
+    
+    # The score is the ratio of matched skills to the skills required by the JD
     score = (len(matched) / len(jd_skills)) * 50 if jd_skills else 0
     return score, sorted(list(matched)), sorted(list(missing))
 
@@ -163,3 +185,4 @@ class handler(BaseHTTPRequestHandler):
             self.send_header('Content-type', 'application/json')
             self.end_headers()
             self.wfile.write(json.dumps({"error": f"An internal server error occurred: {str(e)}"}).encode('utf-8'))
+
