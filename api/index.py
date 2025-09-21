@@ -46,6 +46,7 @@ JSON Response:
         chain = LLMChain(llm=llm, prompt=prompt)
         response_text = chain.invoke({"resume": resume_text, "jd": jd_text}).get("text", "{}")
         
+        # More robust JSON parsing
         json_match = re.search(r'\{.*\}', response_text, re.DOTALL)
         if not json_match:
             print(f"[api] AI response did not contain JSON: {response_text}")
@@ -57,12 +58,14 @@ JSON Response:
         score_val = parsed_json.get("score", 0)
         suggestions_val = parsed_json.get("suggestions", "No suggestions generated.")
         
+        # Normalize score to be out of 50 for the semantic portion of the total score
         normalized_score = (int(score_val) / 100) * 50
         
         return {"score": max(0, min(normalized_score, 50)), "suggestions": suggestions_val}
     except Exception as e:
+        # This will now catch JSON parsing errors and other issues more gracefully
         print(f"[api] Critical error in get_llm_analysis: {e}")
-        return {"score": 0, "suggestions": "Error during AI analysis. Check Vercel logs."}
+        return {"score": 0, "suggestions": "Could not get AI feedback. Please try again."}
 
 # --- Text extraction and keyword matching logic ---
 STOP_WORDS = {'and', 'the', 'of', 'in', 'to', 'a', 'with', 'for', 'on', 'is', 'are', 'an'}
