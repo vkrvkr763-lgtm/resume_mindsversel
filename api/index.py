@@ -5,7 +5,7 @@ import json
 from http.server import BaseHTTPRequestHandler
 from io import BytesIO
 
-# --- Dependencies to install (from requirements.txt) ---
+# --- Dependencies ---
 import fitz  # PyMuPDF
 from docx import Document
 from langchain_core.prompts import PromptTemplate
@@ -25,43 +25,29 @@ if GOOGLE_API_KEY:
     except Exception as e:
         print(f"[api] Failed to initialize LLM: {e}")
 
-# --- NEW: Combined LLM analysis function ---
+# --- Combined LLM analysis function ---
 def get_llm_analysis(resume_text: str, jd_text: str) -> dict:
-    """
-    Performs a single LLM call to get both a semantic score and suggestions.
-    Returns a dictionary with 'score' and 'suggestions'.
-    """
     if not llm:
-        return {"score": 0, "suggestions": "LLM not available."}
-
+        return {"score": 0, "suggestions": "LLM not available. Check API key."}
     try:
         prompt = PromptTemplate.from_template(
-            """Analyze the resume against the job description. Respond with a single JSON object containing two keys: "score" and "suggestions".
-- "score": An integer between 0 and 100 representing the match quality.
+            """Analyze the resume against the job description. Respond ONLY with a single JSON object with two keys: "score" and "suggestions".
+- "score": An integer (0-100) for match quality.
 - "suggestions": A brief string of bulleted resume improvement advice.
 
-Example Response:
-{{
-  "score": 75,
-  "suggestions": "- Highlight experience with cloud platforms like AWS.\\n- Quantify achievements in past projects with metrics."
-}}
+Example: {{"score": 75, "suggestions": "- Highlight cloud experience.\\n- Quantify achievements."}}
 
-Job Description:
-{jd}
-
-Resume:
-{resume}
-
+JD: {jd}
+Resume: {resume}
 JSON Response:
 """
         )
         chain = LLMChain(llm=llm, prompt=prompt)
         response_text = chain.invoke({"resume": resume_text, "jd": jd_text}).get("text", "{}")
         
-        # Clean up the response to ensure it's valid JSON
         json_match = re.search(r'\{.*\}', response_text, re.DOTALL)
         if not json_match:
-            return {"score": 25, "suggestions": "Could not parse AI response."}
+            return {"score": 0, "suggestions": "AI response format error."}
 
         clean_json_str = json_match.group(0)
         parsed_json = json.loads(clean_json_str)
@@ -69,16 +55,14 @@ JSON Response:
         score_val = parsed_json.get("score", 0)
         suggestions_val = parsed_json.get("suggestions", "No suggestions generated.")
         
-        # Normalize score to be out of 50 for consistency with hard match
         normalized_score = (int(score_val) / 100) * 50
         
         return {"score": max(0, min(normalized_score, 50)), "suggestions": suggestions_val}
-
     except Exception as e:
-        print(f"[api] Error in get_llm_analysis: {e}")
-        return {"score": 0, "suggestions": "Error during AI analysis."}
+        print(f"[api] Critical error in get_llm_analysis: {e}")
+        return {"score": 0, "suggestions": "Error during AI analysis. Check logs."}
 
-# --- Text extraction and keyword matching logic (from core.py) ---
+# --- Text extraction and keyword matching logic ---
 STOP_WORDS = {'and', 'the', 'of', 'in', 'to', 'a', 'with', 'for', 'on', 'is', 'are'}
 KNOWN_SKILLS = {'python', 'java', 'sql', 'aws', 'docker', 'react', 'javascript', 'teamwork'}
 
@@ -108,9 +92,6 @@ def get_hard_match_score(resume_text: str, jd_text: str):
     missing = jd_skills.difference(resume_skills)
     score = (len(matched) / len(jd_skills)) * 50 if jd_skills else 0
     return score, sorted(list(matched)), sorted(list(missing))
-
-def format_skills_list(skills_list):
-    return ", ".join(skills_list) if skills_list else "None"
 
 # ==============================================================================
 # MAIN HANDLER FOR VERCEL
@@ -148,24 +129,22 @@ class handler(BaseHTTPRequestHandler):
 
                 if not resume_text: continue
 
-                candidate_name = next((line.strip() for line in resume_text.strip().splitlines()[:5] if re.match(r'^[A-Z][a-z]+(?:\s+[A-Z][a-z]+)+$', line.strip())), "N/A")
                 email_match = re.search(r'\b[A-Za-z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b', resume_text, re.IGNORECASE)
                 candidate_email = email_match.group(0) if email_match else "N/A"
 
                 hard_score, matched_skills, missing_skills = get_hard_match_score(resume_text, job_description_text)
-                
-                # --- Single efficient LLM call ---
                 llm_results = get_llm_analysis(resume_text, job_description_text)
-                semantic_score = llm_results["score"]
-                suggestions = llm_results["suggestions"]
                 
-                total_score = round(hard_score + semantic_score)
+                total_score = round(hard_score + llm_results["score"])
                 verdict = "High" if total_score >= 80 else "Medium" if total_score >= 50 else "Low"
                 
                 results.append({
-                    "candidateName": candidate_name, "candidateEmail": candidate_email,
-                    "score": total_score, "verdict": verdict, "missingSkills": missing_skills,
-                    "suggestions": suggestions
+                    "resumeName": file_name, # CHANGED: Using file_name for the table
+                    "candidateEmail": candidate_email,
+                    "score": total_score,
+                    "verdict": verdict,
+                    "missingSkills": missing_skills,
+                    "suggestions": llm_results["suggestions"]
                 })
             
             self.send_response(200)
@@ -177,4 +156,5 @@ class handler(BaseHTTPRequestHandler):
             self.send_response(500)
             self.send_header('Content-type', 'application/json')
             self.end_headers()
-            self.wfile.write(json.dumps({"error": f"An internal error occurred: {str(e)}"}).encode('utf-8'))
+            self.wfile.write(json.dumps({"error": f"An internal server error occurred: {str(e)}"}).encode('utf-8'))
+
