@@ -163,16 +163,25 @@ class handler(BaseHTTPRequestHandler):
                 hard_score, matched_skills, missing_skills = get_hard_match_score(resume_text, job_description_text)
                 llm_results = get_llm_analysis(resume_text, job_description_text)
                 
+                # --- CORRECTED: Generate suggestions based on missing skills ---
+                suggestions_text = ""
+                if missing_skills:
+                    intro = "We analyzed your resume thoroughly and by matching with our job description requirements, the following are the suggestions:\n"
+                    points = "\n".join([f"{i+1}) You should improve '{skill}'" for i, skill in enumerate(missing_skills)])
+                    suggestions_text = intro + points
+                else:
+                    suggestions_text = "Great match! All key skills from the job description appear to be present in the resume."
+                
                 total_score = round(hard_score + llm_results["score"])
                 verdict = "High" if total_score >= 80 else "Medium" if total_score >= 50 else "Low"
                 
                 results.append({
-                    "resumeName": file_name,
+                    "candidateName": file_name, # CORRECTED: Changed key to match frontend
                     "candidateEmail": candidate_email,
                     "score": total_score,
                     "verdict": verdict,
                     "missingSkills": missing_skills,
-                    "suggestions": llm_results["suggestions"]
+                    "suggestions": suggestions_text # CORRECTED: Using new suggestions text
                 })
             
             self.send_response(200)
