@@ -16,6 +16,26 @@ from langchain_google_genai import ChatGoogleGenerativeAI
 # CONSOLIDATED LOGIC
 # ==============================================================================
 
+# --- Predefined General Skills List ---
+GENERAL_SKILLS = {
+    # Programming Languages
+    'python', 'java', 'javascript', 'typescript', 'c#', 'c++', 'php', 'ruby', 'go', 'swift', 'kotlin', 'sql', 'nosql', 'r', 'matlab', 'scala', 'perl',
+    # Web Development
+    'html', 'css', 'react', 'angular', 'vue', 'nodejs', 'express', 'django', 'flask', 'fastapi', 'laravel', 'spring', 'asp.net',
+    # Cloud & DevOps
+    'aws', 'azure', 'gcp', 'docker', 'kubernetes', 'terraform', 'ansible', 'jenkins', 'ci/cd', 'git', 'github', 'gitlab',
+    # Data Science & ML
+    'machine learning', 'deep learning', 'tensorflow', 'pytorch', 'scikit-learn', 'pandas', 'numpy', 'matplotlib', 'seaborn',
+    'data analysis', 'data visualization', 'tableau', 'power bi', 'nlp', 'natural language processing', 'computer vision', 'keras',
+    # Databases
+    'mysql', 'postgresql', 'mongodb', 'redis', 'elasticsearch', 'sqlite', 'oracle', 'sql server',
+    # Other Tech
+    'linux', 'rest api', 'graphql', 'agile', 'scrum', 'jira', 'figma',
+    # Soft Skills
+    'communication', 'teamwork', 'problem solving', 'leadership', 'project management', 'collaboration', 'creativity', 'critical thinking', 'adaptability'
+}
+
+
 # --- Initialize LLM ---
 llm = None
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
@@ -39,27 +59,6 @@ def parse_llm_json_response(response_text: str, default_value=None):
         return default_value or {}
 
 # --- Core AI Functions ---
-def extract_jd_skills(jd_text: str) -> list:
-    """Uses LLM to extract key skills from a job description."""
-    if not llm:
-        return []
-    try:
-        prompt = PromptTemplate.from_template(
-            """Analyze the following job description. Extract the most critical skills, technologies, and qualifications.
-Respond ONLY with a single, valid JSON array of strings.
-Example: ["Python", "Data Analysis", "Machine Learning", "Communication"]
-
-Job Description: {jd}
-JSON Array Response:
-"""
-        )
-        chain = LLMChain(llm=llm, prompt=prompt)
-        response_text = chain.invoke({"jd": jd_text}).get("text", "[]")
-        return parse_llm_json_response(response_text, default_value=[])
-    except Exception as e:
-        print(f"[api] Error in extract_jd_skills: {e}")
-        return []
-
 def get_llm_analysis(resume_text: str, jd_text: str) -> dict:
     """Uses LLM to get a contextual score and a 3-line feedback summary."""
     if not llm:
@@ -167,8 +166,10 @@ class handler(BaseHTTPRequestHandler):
             if not job_description_text:
                  raise ValueError("Job description text is empty.")
 
-            # 1. Extract skills from JD once
-            jd_skills = extract_jd_skills(job_description_text)
+            # 1. Extract skills from JD by matching against the general skills list
+            jd_text_lower = job_description_text.lower()
+            jd_skills = sorted([skill for skill in GENERAL_SKILLS if re.search(r'\b' + re.escape(skill) + r'\b', jd_text_lower)])
+
 
             analysis_results = []
             for res in resumes_data:
