@@ -96,9 +96,9 @@
                         <div>
                             <h3 class="text-xl font-bold text-white mb-4">Key Features</h3>
                              <ul class="space-y-3 text-gray-400">
-                                <li class="flex items-center"><span class="text-green-400 mr-3 text-lg">✅</span><span><b>AI-Powered Skill Matching:</b> Goes beyond keywords to understand skill context and relevance.</span></li>
-                                <li class="flex items-center"><span class="text-green-400 mr-3 text-lg">✅</span><span><b>Data-Driven Candidate Ranking:</b> Focus on top applicants first with a clear, data-driven score.</span></li>
-                                <li class="flex items-center"><span class="text-green-400 mr-3 text-lg">✅</span><span><b>In-Depth Match Reports:</b> Get detailed comparisons of qualifications against job needs.</span></li>
+                                 <li class="flex items-center"><span class="text-green-400 mr-3 text-lg">✅</span><span><b>AI-Powered Skill Matching:</b> Goes beyond keywords to understand skill context and relevance.</span></li>
+                                 <li class="flex items-center"><span class="text-green-400 mr-3 text-lg">✅</span><span><b>Data-Driven Candidate Ranking:</b> Focus on top applicants first with a clear, data-driven score.</span></li>
+                                 <li class="flex items-center"><span class="text-green-400 mr-3 text-lg">✅</span><span><b>In-Depth Match Reports:</b> Get detailed comparisons of qualifications against job needs.</span></li>
                              </ul>
                         </div>
                     </div>
@@ -132,7 +132,7 @@
                             <p class="mt-4 text-lg text-gray-400">Analyzing all resumes... Please wait.</p>
                         </div>
                     </div>
-                
+                    
                     <div id="resultsState" class="hidden h-full flex-col">
                         <div class="flex-grow">
                             <h3 class="text-2xl font-bold text-white mb-4">Analysis Summary</h3>
@@ -156,7 +156,7 @@
                                 <table class="min-w-full bg-slate-700">
                                     <thead>
                                         <tr class="bg-slate-600 text-left text-sm font-semibold text-gray-200 uppercase">
-                                            <th class="py-3 px-4 rounded-tl-lg table-cell-fixed">Candidate Name</th>
+                                            <th class="py-3 px-4 rounded-tl-lg table-cell-fixed">Resume PDF Name</th>
                                             <th class="py-3 px-4 table-cell-fixed">Score</th>
                                             <th class="py-3 px-4 table-cell-fixed">Verdict</th>
                                             <th class="py-3 px-4">Missing Skills</th>
@@ -165,7 +165,7 @@
                                         </tr>
                                     </thead>
                                     <tbody id="resultsTableBody" class="divide-y divide-slate-600">
-                                        </tbody>
+                                    </tbody>
                                 </table>
                             </div>
                         </div>
@@ -414,7 +414,7 @@
 
                 let suggestionsHtml = '<li>No suggestions available.</li>';
                 if (typeof res.suggestions === 'string' && res.suggestions.trim().length > 0) {
-                    const suggestionsArray = res.suggestions.split(/[.\n]/).filter(s => s.trim().length > 0);
+                    const suggestionsArray = res.suggestions.split(/[\n]/).filter(s => s.trim().length > 0);
                     suggestionsHtml = suggestionsArray.map(item => `<li class="break-words">${item.trim()}</li>`).join('');
                 }
                 
