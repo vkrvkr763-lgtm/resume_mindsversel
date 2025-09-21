@@ -141,7 +141,7 @@
                                     Download Results (CSV)
                                 </button>
                             </div>
-                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8 text-center">
+                            <div class="grid grid-cols-1 sm:grid-cols-4 gap-4 mb-8 text-center">
                                 <div class="bg-slate-700 p-4 rounded-xl">
                                     <h4 class="text-gray-400 text-sm font-semibold">Total Resumes</h4>
                                     <p id="totalCount" class="text-2xl font-bold text-white mt-1">0</p>
@@ -153,6 +153,10 @@
                                 <div class="bg-slate-700 p-4 rounded-xl">
                                     <h4 class="text-gray-400 text-sm font-semibold">Medium Verdict</h4>
                                     <p id="mediumCount" class="text-2xl font-bold text-yellow-400 mt-1">0</p>
+                                </div>
+                                <div class="bg-slate-700 p-4 rounded-xl">
+                                    <h4 class="text-gray-400 text-sm font-semibold">Low Verdict</h4>
+                                    <p id="lowCount" class="text-2xl font-bold text-red-400 mt-1">0</p>
                                 </div>
                             </div>
 
@@ -244,6 +248,7 @@
         const totalCountSpan = document.getElementById('totalCount');
         const highCountSpan = document.getElementById('highCount');
         const mediumCountSpan = document.getElementById('mediumCount');
+        const lowCountSpan = document.getElementById('lowCount');
         const resultsTableBody = document.getElementById('resultsTableBody');
         const mainContentGrid = document.getElementById('main-content-grid');
         const startOverBtn = document.getElementById('startOverBtn');
@@ -457,12 +462,15 @@
             totalCountSpan.textContent = results.length;
             let highCount = 0;
             let mediumCount = 0;
+            let lowCount = 0;
             results.forEach(res => {
                 if (res.verdict === 'High') highCount++;
                 else if (res.verdict === 'Medium') mediumCount++;
+                else if (res.verdict === 'Low') lowCount++;
             });
             highCountSpan.textContent = highCount;
             mediumCountSpan.textContent = mediumCount;
+            lowCountSpan.textContent = lowCount;
 
             // Populate the table
             resultsTableBody.innerHTML = '';
@@ -504,3 +512,4 @@
     </script>
 </body>
 </html>
+
