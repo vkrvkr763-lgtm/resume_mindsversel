@@ -156,7 +156,7 @@
                                 <table class="min-w-full bg-slate-700">
                                     <thead>
                                         <tr class="bg-slate-600 text-left text-sm font-semibold text-gray-200 uppercase">
-                                            <th class="py-3 px-4 rounded-tl-lg table-cell-fixed">Resume PDF Name</th>
+                                            <th class="py-3 px-4 rounded-tl-lg table-cell-fixed">Candidate Name</th>
                                             <th class="py-3 px-4 table-cell-fixed">Score</th>
                                             <th class="py-3 px-4 table-cell-fixed">Verdict</th>
                                             <th class="py-3 px-4">Missing Skills</th>
@@ -169,9 +169,15 @@
                                 </table>
                             </div>
                         </div>
-                        <button id="startOverBtn" class="mt-8 w-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-bold py-4 px-8 rounded-xl shadow-lg hover:shadow-purple-500/30 transition-shadow duration-300 transform hover:scale-105">
-                            Start New Analysis
-                        </button>
+                        <div class="mt-8 flex flex-col sm:flex-row gap-4">
+                            <button id="startOverBtn" class="w-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white font-bold py-4 px-8 rounded-xl shadow-lg hover:shadow-purple-500/30 transition-shadow duration-300 transform hover:scale-105">
+                                Start New Analysis
+                            </button>
+                            <button id="downloadCsvBtn" class="w-full bg-green-600 text-white font-bold py-4 px-8 rounded-xl shadow-lg hover:bg-green-700 transition-colors duration-300 transform hover:scale-105 flex items-center justify-center gap-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-download"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                                Download Results
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -224,6 +230,7 @@
         const resultsTableBody = document.getElementById('resultsTableBody');
         const mainContentGrid = document.getElementById('main-content-grid');
         const startOverBtn = document.getElementById('startOverBtn');
+        const downloadCsvBtn = document.getElementById('downloadCsvBtn');
 
         let isJdProcessed = false;
         let jobDescriptionData = null;
@@ -316,6 +323,8 @@
             resumeFileCountSpan.classList.add('hidden');
             resultsTableBody.innerHTML = '';
         });
+
+        downloadCsvBtn.addEventListener('click', downloadResultsAsCSV);
 
         // --- Functions ---
         function displayProcessedJd(name) {
@@ -414,8 +423,8 @@
 
                 let suggestionsHtml = '<li>No suggestions available.</li>';
                 if (typeof res.suggestions === 'string' && res.suggestions.trim().length > 0) {
-                    const suggestionsArray = res.suggestions.split(/[\n]/).filter(s => s.trim().length > 0);
-                    suggestionsHtml = suggestionsArray.map(item => `<li class="break-words">${item.trim()}</li>`).join('');
+                     const suggestionsArray = res.suggestions.split(/[.\n]/).filter(s => s.trim().length > 0);
+                     suggestionsHtml = suggestionsArray.map(item => `<li class="break-words">${item.trim()}</li>`).join('');
                 }
                 
                 const row = document.createElement('tr');
@@ -436,6 +445,54 @@
                 `;
                 resultsTableBody.appendChild(row);
             });
+        }
+
+        function downloadResultsAsCSV() {
+            const table = document.getElementById('resultsTableBody');
+            const headers = ["Candidate Name", "Score", "Verdict", "Missing Skills", "Candidate Email", "Suggestions"];
+            
+            const escapeCsv = (str) => {
+                if (str === null || str === undefined) return '';
+                str = String(str);
+                if (str.includes('"') || str.includes(',') || str.includes('\n')) {
+                    return `"${str.replace(/"/g, '""')}"`;
+                }
+                return str;
+            };
+
+            let csvContent = headers.join(',') + '\n';
+
+            const rows = table.querySelectorAll('tr');
+            rows.forEach(row => {
+                const cells = row.querySelectorAll('td');
+                const rowData = [];
+                
+                rowData.push(escapeCsv(cells[0].textContent.trim()));
+                rowData.push(escapeCsv(cells[1].textContent.trim()));
+                rowData.push(escapeCsv(cells[2].textContent.trim()));
+                
+                const missingSkills = Array.from(cells[3].querySelectorAll('li')).map(li => li.textContent.trim()).join('; ');
+                rowData.push(escapeCsv(missingSkills));
+                
+                rowData.push(escapeCsv(cells[4].textContent.trim()));
+                
+                const suggestions = Array.from(cells[5].querySelectorAll('li')).map(li => li.textContent.trim()).join('; ');
+                rowData.push(escapeCsv(suggestions));
+                
+                csvContent += rowData.join(',') + '\n';
+            });
+
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            if (link.download !== undefined) {
+                const url = URL.createObjectURL(blob);
+                link.setAttribute('href', url);
+                link.setAttribute('download', 'resume_analysis_results.csv');
+                link.style.visibility = 'hidden';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
         }
     </script>
 </body>
